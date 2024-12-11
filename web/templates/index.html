@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/static/header.css">
+    <link rel="stylesheet" href="/static/footer.css">
+    <title>Forum - Home</title>
+</head>
+<body>
+    <div class="page-container">
+        <header class="header">
+            <div class="container">
+                <h1><a href="/">Forum</a></h1>
+                <nav>
+                    {{if .LoggedIn}}
+                        <div class="header-buttons">
+                            <button onclick="window.location.href='/my_posts'">My Posts</button>
+                            <button onclick="window.location.href='/liked_posts'">Liked Posts</button>
+                            <button onclick="window.location.href='/logout'">Logout</button>
+                        </div>
+                    {{else}}
+                        <div class="header-buttons">
+                            <button onclick="window.location.href='/login'">Login</button>
+                            <button onclick="window.location.href='/register'">Register</button>
+                        </div>
+                    {{end}}
+                </nav>
+            </div>
+        </header>
+        
+        <div class="main-layout container">
+            <aside class="sidebar">
+                {{if .LoggedIn}}
+                    <p>Hello, {{.Username}}!</p>
+                {{else}}
+                    <p>Hello, Guest!</p>
+                {{end}}
+                <br>
+                <h2>Filter categories</h2>
+                <form method="get" action="/">
+                    <select id="category" name="category" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {{range .Categories}}
+                            <option value="{{.ID}}" {{if eq .ID $.SelectedCategory}}selected{{end}}>{{.Name}}</option>
+                        {{end}}
+                    </select>
+                </form>
+                <br>        
+                {{if .LoggedIn}}
+                    <h2>Create a New Post</h2>
+                    <form method="post" action="/create_post" style="margin-top: 20px;">
+                        <label style="font-weight: bold; margin-bottom: 10px; display: block;">Choose categories:</label>
+                        <div style="margin-bottom: 15px;">
+                            {{range .Categories}}
+                                <div style="margin-bottom: 5px;">
+                                    <input type="checkbox" name="categories" value="{{.ID}}" id="category_{{.ID}}">
+                                    <label for="category_{{.ID}}">{{.Name}}</label>
+                                </div>
+                            {{end}}
+                        </div>
+                        <label for="content" style="font-weight: bold; margin-bottom: 10px; display: block;">Post Content:</label>
+                        <textarea id="content" name="content" rows="6" style="width: 100%; resize: none; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" placeholder="What's on your mind?" required></textarea>
+                        <button type="submit" style="margin-top: 15px; padding: 10px 20px; background-color: #6200ea; color: white; border: none; border-radius: 8px; cursor: pointer;">Create Post</button>
+                    </form>
+                {{end}}
+            </aside>
+
+            <main class="content">        
+                <h2>Posts</h2>
+                {{if .Posts}}
+                    {{range .Posts}} 
+                    <div class="post">
+                        <p>{{.Content}}</p>
+                        <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
+                        <div class="post-tags">
+                            {{range .Categories}}
+                            <span class="tag">{{.}}</span>
+                            {{end}}
+                        </div>
+                        <p>
+                            <form action="/like" method="post" style="display: inline;">
+                                <input type="hidden" name="post_id" value="{{.ID}}">
+                                <button type="submit" style="background: none; border: none; color: #007BFF; cursor: pointer; font-size: 0.9rem;">Like</button>
+                            </form> {{.Likes}}
+                            <form action="/dislike" method="post" style="display: inline;">
+                                <input type="hidden" name="post_id" value="{{.ID}}">
+                                <button type="submit" style="background: none; border: none; color: #007BFF; cursor: pointer; font-size: 0.9rem;">Dislike</button>
+                            </form> {{.Dislikes}}
+                        </p>
+                        <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
+                    </div>
+                    {{end}} 
+                {{else}}
+                    <p>No posts available.</p>
+                {{end}}
+            </main>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 Forum</p>
+        </footer>
+    </div>
+</body>
+</html>

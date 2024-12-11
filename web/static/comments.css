@@ -1,0 +1,95 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
+}
+
+.page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.post, .comment-section {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    margin-bottom: 15px;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.comment-section {
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.post-tags .tag {
+    display: inline-block;
+    background-color: #6200ea;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+button {
+    background-color: #6200ea;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #3700b3;
+}
+
+.like-button img, .dislike-button img {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    opacity: 0.9;
+    transition: transform 0.2s ease, opacity 0.3s ease;
+}
+
+.like-button, .dislike-button {
+    background: none;
+    border: none;
+    padding: 5px; 
+    display: inline-flex;
+}
+
+.like-button:hover img, .dislike-button:hover img {
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+.add-comment textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #444;
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+    border-radius: 5px;
+    resize: vertical;
+}
+
+.notification {
+    color: #ff4d4d;
+    font-weight: bold;
+}
+
+.back-button button {
+    background-color: #333;
+    color: white;
+    margin-top: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.back-button button:hover {
+    background-color: #555;
+}

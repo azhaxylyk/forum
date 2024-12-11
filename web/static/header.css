@@ -1,0 +1,38 @@
+.header {
+    background-color: #1e1e1e; 
+    color: #e0e0e0; 
+    padding: 15px 0;
+}
+
+.header a {
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 1.5rem;
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 a {
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 24px;
+}
+
+.header-buttons button {
+    margin-left: 10px;
+    background-color: #6200ea;
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.header-buttons button:hover {
+    background-color: #3700b3;
+}
