@@ -1,50 +1,57 @@
+
 # Forum
 
 ## Objectives
-This project consists in creating a web forum that allows :
-- communication between users.
-- associating categories to posts.
-- liking and disliking posts and comments.
-- filtering posts.
+This project aims to create a web forum with the following features:
+- User communication via posts and comments.
+- Post categorization using tags or categories.
+- Ability to like or dislike posts and comments.
+- Post filtering by categories or other criteria.
 
 ## Installation
-Clone the repository:
-```bash
-git@git.01.alem.school:azhaxylyk/forum.git
-```
 
-Navigate to the project directory:
-```bash
-cd forum
-```
+1. Clone the repository:
+   ```bash
+   git clone git@github.com:azhaxylyk/forum.git
+   ```
+
+2. Navigate to the project directory:
+   ```bash
+   cd forum
+   ```
 
 ## Usage
-Run the program:
 
+### Run the Program
+You can start the program in one of the following ways:
+
+1. **Directly using Go**:
+   ```bash
+   go run ./cmd
+   ```
+
+2. **Using Makefile**:
+   - Start the server:
+     ```bash
+     make run
+     ```
+
+3. **Using Docker**:
+   - Build the Docker image:
+     ```bash
+     make build
+     ```
+   - Run the Docker container:
+     ```bash
+     make run-img
+     ```
+
+### Stop the Server
+To stop the server or Docker container:
 ```bash
-go run ./cmd
-```
-
-### To Start the sever
-``` 
-make run 
-```
-### To Build docker image
-
-``` 
-make build
-```
-### To run docker container 
-
-``` 
-make run-img
-```
-
-### To Stop running of the sever
-
-``` 
 make stop
 ```
+
 ## Authors
 - [azhaxylyk](https://01.alem.school/git/azhaxylyk)
 - [abulatov](https://01.alem.school/git/abulatov)
