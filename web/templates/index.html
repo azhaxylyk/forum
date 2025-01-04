@@ -50,20 +50,7 @@
                 <br>        
                 {{if .LoggedIn}}
                     <h2>Create a New Post</h2>
-                    <form method="post" action="/create_post" style="margin-top: 20px;">
-                        <label style="font-weight: bold; margin-bottom: 10px; display: block;">Choose categories:</label>
-                        <div style="margin-bottom: 15px;">
-                            {{range .Categories}}
-                                <div style="margin-bottom: 5px;">
-                                    <input type="checkbox" name="categories" value="{{.ID}}" id="category_{{.ID}}">
-                                    <label for="category_{{.ID}}">{{.Name}}</label>
-                                </div>
-                            {{end}}
-                        </div>
-                        <label for="content" style="font-weight: bold; margin-bottom: 10px; display: block;">Post Content:</label>
-                        <textarea id="content" name="content" rows="6" style="width: 100%; resize: none; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" placeholder="What's on your mind?" required></textarea>
-                        <button type="submit" style="margin-top: 15px; padding: 10px 20px; background-color: #6200ea; color: white; border: none; border-radius: 8px; cursor: pointer;">Create Post</button>
-                    </form>
+                    <button onclick="openModal()" style="margin-top: 20px; padding: 10px 20px; background-color: #6200ea; color: white; border: none; border-radius: 8px; cursor: pointer;">Create New Post</button>
                 {{end}}
             </aside>
 
@@ -102,5 +89,44 @@
             <p>&copy; 2024 Forum</p>
         </footer>
     </div>
+
+    <!-- Modal for creating a new post -->
+    <div id="createPostModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal()">&times;</span>
+            <h2>Create a New Post</h2>
+            <form method="post" action="/create_post">
+                <label style="font-weight: bold; margin-bottom: 10px; display: block;">Choose categories:</label>
+                <div style="margin-bottom: 15px;">
+                    {{range .Categories}}
+                        <div style="margin-bottom: 5px;">
+                            <input type="checkbox" name="categories" value="{{.ID}}" id="category_{{.ID}}">
+                            <label for="category_{{.ID}}">{{.Name}}</label>
+                        </div>
+                    {{end}}
+                </div>
+                <label for="modal-content" style="font-weight: bold; margin-bottom: 10px; display: block;">Post Content:</label>
+                <textarea id="modal-content" name="content" rows="6" style="width: 100%; resize: none; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" placeholder="What's on your mind?" required></textarea>
+                <button type="submit" style="margin-top: 15px; padding: 10px 20px; background-color: #6200ea; color: white; border: none; border-radius: 8px; cursor: pointer;">Create Post</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() {
+            document.getElementById("createPostModal").style.display = "block";
+        }
+
+        function closeModal() {
+            document.getElementById("createPostModal").style.display = "none";
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById("createPostModal");
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
 </body>
 </html>

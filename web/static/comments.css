@@ -11,15 +11,25 @@ body {
 }
 
 .post, .comment-section {
+    max-width: 100%;
+    word-wrap: break-word;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #444;
     background-color: #1e1e1e;
-    border: 1px solid #333;
-    margin-bottom: 15px;
-    padding: 15px;
-    border-radius: 8px;
+    border-radius: 5px;
+}
+
+p {
+    margin: 5px 0;
 }
 
 .comment-section {
-    margin-top: 10px;
     padding-left: 20px;
 }
 
@@ -47,27 +57,7 @@ button:hover {
     background-color: #3700b3;
 }
 
-.like-button img, .dislike-button img {
-    width: 24px;
-    height: 24px;
-    cursor: pointer;
-    opacity: 0.9;
-    transition: transform 0.2s ease, opacity 0.3s ease;
-}
-
-.like-button, .dislike-button {
-    background: none;
-    border: none;
-    padding: 5px; 
-    display: inline-flex;
-}
-
-.like-button:hover img, .dislike-button:hover img {
-    opacity: 1;
-    transform: scale(1.1);
-}
-
-.add-comment textarea {
+textarea {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
@@ -78,18 +68,7 @@ button:hover {
     resize: vertical;
 }
 
-.notification {
-    color: #ff4d4d;
-    font-weight: bold;
-}
-
-.back-button button {
-    background-color: #333;
-    color: white;
-    margin-top: 20px;
-    transition: background-color 0.3s ease;
-}
-
-.back-button button:hover {
-    background-color: #555;
+textarea, button {
+    max-width: 100%;
+    box-sizing: border-box;
 }

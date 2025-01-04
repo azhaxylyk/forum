@@ -43,6 +43,10 @@ body {
     margin-bottom: 15px;
     padding: 15px;
     border-radius: 8px;
+    overflow-wrap: break-word; /* Переносит длинные слова */
+    word-break: break-word; /* Дополнительный перенос */
+    max-width: 100%; /* Устанавливает ограничение по ширине */
+    box-sizing: border-box;
 }
 
 .post-tags .tag {
@@ -58,6 +62,8 @@ body {
 textarea {
     max-width: 100%; 
     box-sizing: border-box;
+    word-wrap: break-word;
+    word-break: break-word;
 }
 
 button {
@@ -81,4 +87,46 @@ button:hover {
 
 .read-more:hover {
     text-decoration: underline;
+}
+
+/* Стиль для фона модального окна */
+.modal {
+    display: none; /* Изначально скрыто */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Прозрачный черный фон */
+    overflow: auto; /* Если содержимое превышает размер окна */
+}
+
+/* Стиль для самого модального окна */
+.modal-content {
+    position: absolute;
+    top: 50%; /* Центрируем вертикально */
+    left: 50%; /* Центрируем горизонтально */
+    transform: translate(-50%, -50%); /* Сдвигаем по осям, чтобы центрировать */
+    background-color: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 400px; /* Ширина модального окна */
+    max-width: 90%; /* Для адаптивности */
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }
