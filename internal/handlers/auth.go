@@ -5,16 +5,23 @@ import (
 	"html/template"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
+	"unicode"
 )
 
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		email := r.FormValue("email")
-		username := r.FormValue("username")
+		email := sanitizeInput(r.FormValue("email"))
+		username := sanitizeInput(r.FormValue("username"))
 		password := r.FormValue("password")
+
+		if email == "" || username == "" || password == "" {
+			ErrorHandler(w, r, http.StatusBadRequest, "All fields are required")
+			return
+		}
 
 		if !isValidEmail(email) {
 			ErrorHandler(w, r, http.StatusBadRequest, "Invalid email format")
@@ -27,8 +34,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if emailExists {
-			tmpl, _ := template.ParseFiles("web/templates/register.html")
-			tmpl.Execute(w, struct{ Error string }{Error: "Email is already registered"})
+			renderTemplateWithError(w, "register", "Email is already registered")
 			return
 		}
 
@@ -38,8 +44,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if usernameExists {
-			tmpl, _ := template.ParseFiles("web/templates/register.html")
-			tmpl.Execute(w, struct{ Error string }{Error: "Username is already taken"})
+			renderTemplateWithError(w, "register", "Username is already taken")
 			return
 		}
 
@@ -62,6 +67,21 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, _ := template.ParseFiles("web/templates/register.html")
 	tmpl.Execute(w, nil)
+}
+
+func sanitizeInput(input string) string {
+	trimmed := strings.TrimSpace(input)
+	return strings.Map(func(r rune) rune {
+		if unicode.IsPrint(r) && !unicode.IsSpace(r) {
+			return r
+		}
+		return -1
+	}, trimmed)
+}
+
+func renderTemplateWithError(w http.ResponseWriter, templateName, errorMessage string) {
+	tmpl, _ := template.ParseFiles("web/templates/" + templateName + ".html")
+	tmpl.Execute(w, struct{ Error string }{Error: errorMessage})
 }
 
 func LoginHandler(w http.ResponseWriter, r *http.Request) {

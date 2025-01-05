@@ -12,6 +12,8 @@ type ErrorPage struct {
 }
 
 func ErrorHandler(w http.ResponseWriter, r *http.Request, statusCode int, statusText string) {
+	w.WriteHeader(statusCode)
+
 	data := ErrorPage{
 		StatusCode: fmt.Sprint(statusCode),
 		StatusText: statusText,
@@ -19,8 +21,7 @@ func ErrorHandler(w http.ResponseWriter, r *http.Request, statusCode int, status
 
 	ts, err := template.ParseFiles("web/templates/wentwrong.html")
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
