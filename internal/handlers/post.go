@@ -160,11 +160,16 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	var loggedIn bool
 	var username string
-	cookie, _ := r.Cookie("session_token")
-
-	_, username, err = models.GetIDBySessionToken(cookie.Value)
-	if err == nil {
-		loggedIn = true
+	cookie, err := r.Cookie("session_token")
+	if err != nil || cookie == nil || cookie.Value == "" {
+		loggedIn = false
+	} else {
+		userID, username, err := models.GetIDBySessionToken(cookie.Value)
+		if err != nil || userID == "" || username == "" {
+			loggedIn = false
+		} else {
+			loggedIn = true
+		}
 	}
 
 	data := struct {
