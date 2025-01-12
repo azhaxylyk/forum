@@ -150,3 +150,20 @@ func IsValidContent(content string) bool {
 	sanitized := SanitizeInput(content)
 	return len(sanitized) > 0
 }
+
+func GetCommentOwner(commentID string) (string, error) {
+	var owner string
+	err := db.QueryRow(`
+        SELECT users.id
+        FROM users
+        JOIN comments ON users.id = comments.user_id
+        WHERE comments.id = ?
+    `, commentID).Scan(&owner)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil // Комментарий не найден
+		}
+		return "", err
+	}
+	return owner, nil
+}

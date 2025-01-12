@@ -37,6 +37,12 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Уведомление владельца поста
+	postOwnerID, err := models.GetPostOwner(postID)
+	if err == nil && postOwnerID != userID {
+		_ = models.CreateNotification(postOwnerID, userID, "comment", postID, "post")
+	}
+
 	http.Redirect(w, r, "/post?id="+postID, http.StatusSeeOther)
 }
 
@@ -66,7 +72,6 @@ func LikeCommentHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/post?id="+postID+"&notification=already_liked", http.StatusSeeOther)
 			return
 		}
-
 		http.Error(w, "Error liking comment", http.StatusInternalServerError)
 		return
 	}
@@ -75,6 +80,12 @@ func LikeCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Error updating like count: "+err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Получение владельца комментария для уведомления
+	commentOwnerID, err := models.GetCommentOwner(commentID)
+	if err == nil && commentOwnerID != userID {
+		_ = models.CreateNotification(commentOwnerID, userID, "like", commentID, "comment")
 	}
 
 	http.Redirect(w, r, "/post?id="+postID, http.StatusSeeOther)
@@ -106,7 +117,6 @@ func DislikeCommentHandler(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "/post?id="+postID+"&notification=already_disliked", http.StatusSeeOther)
 			return
 		}
-
 		http.Error(w, "Error disliking comment", http.StatusInternalServerError)
 		return
 	}
@@ -115,6 +125,12 @@ func DislikeCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 		return
+	}
+
+	// Уведомление владельца комментария
+	commentOwnerID, err := models.GetCommentOwner(commentID)
+	if err == nil && commentOwnerID != userID {
+		_ = models.CreateNotification(commentOwnerID, userID, "dislike", commentID, "comment")
 	}
 
 	http.Redirect(w, r, "/post?id="+postID, http.StatusSeeOther)

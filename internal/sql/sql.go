@@ -35,6 +35,7 @@ func CreateTables(db *sql.DB) error {
 		"./migrations/post_likes_table.sql",
 		"./migrations/comment_likes_table.sql",
 		"./migrations/post_categories_table.sql",
+		"./migrations/notifications_table.sql",
 	}
 
 	for _, file := range sqlFiles {

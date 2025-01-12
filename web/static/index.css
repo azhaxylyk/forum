@@ -89,31 +89,28 @@ button:hover {
     text-decoration: underline;
 }
 
-/* Стиль для фона модального окна */
+/* Modal styles */
 .modal {
-    display: none; /* Изначально скрыто */
+    display: none;
     position: fixed;
     z-index: 1000;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Прозрачный черный фон */
-    overflow: auto; /* Если содержимое превышает размер окна */
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* Стиль для самого модального окна */
 .modal-content {
-    position: absolute;
-    top: 50%; /* Центрируем вертикально */
-    left: 50%; /* Центрируем горизонтально */
-    transform: translate(-50%, -50%); /* Сдвигаем по осям, чтобы центрировать */
     background-color: #1e1e1e;
+    margin: 15% auto;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    width: 400px; /* Ширина модального окна */
-    max-width: 90%; /* Для адаптивности */
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 10px;
+    position: relative;
 }
 
 .close-button {
@@ -128,5 +125,103 @@ button:hover {
 .close-button:focus {
     color: black;
     text-decoration: none;
+}
+
+/* Уведомления - фиксированное положение */
+#notificationsModal {
+    display: none;
+    position: absolute; /* Абсолютное позиционирование */
+    top: 50px; /* Расположение чуть ниже кнопки уведомлений */
+    right: 20px; /* Смещение вправо */
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1001;
+    width: 300px;
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Стили кнопок и элементов уведомлений */
+#notificationsModal .notification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    border-bottom: 1px solid #333;
+    color: #e0e0e0;
+}
+
+#notificationsModal .notification-item.unread {
+    background-color: #333333;
+    font-weight: bold;
+}
+
+#notificationsModal .notification-item:hover .mark-read {
+    display: block;
+}
+
+/* Крестик для отдельного уведомления */
+.notification-item .mark-read {
+    display: none;
+    color: #ff5252;
     cursor: pointer;
+}
+
+.notification-item .mark-read:hover {
+    color: #ff0000;
+}
+
+/* Кнопки управления уведомлениями */
+.notification-actions {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.notification-actions button {
+    margin: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+}
+
+.notification-button {
+    position: relative;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.notification-icon {
+    width: 15px; /* Уменьшите размер до 24px */
+    height: 15px; /* Уменьшите размер до 24px */
+    filter: brightness(0) invert(1); /* Сделать белым */
+    transition: transform 0.3s ease; /* Добавить анимацию */
+}
+
+.notification-icon:hover {
+    transform: scale(1.1); /* Легкое увеличение при наведении */
+}
+
+
+.notification-count {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 50%;
+    padding: 2px 6px;
+    transform: translate(50%, -50%);
+}
+
+@media (max-width: 768px) {
+    .notification-icon {
+        width: 20px; /* Размер меньше на мобильных устройствах */
+        height: 20px;
+    }
 }

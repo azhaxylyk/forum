@@ -29,7 +29,12 @@ func main() {
 	http.HandleFunc("/dislike_comment", handlers.DislikeCommentHandler)
 	http.HandleFunc("/my_posts", handlers.MyPostsHandler)
 	http.HandleFunc("/liked_posts", handlers.LikedPostsHandler)
+	http.HandleFunc("/notifications", handlers.GetNotificationsHandler)
+	http.HandleFunc("/notifications/mark-as-read", handlers.MarkNotificationAsReadHandler)
+	http.HandleFunc("/notifications/mark-all-as-read", handlers.MarkAllNotificationsAsReadHandler)
+	http.HandleFunc("/notifications/unread-count", handlers.GetUnreadCountHandler)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
+	http.Handle("/icons/", http.StripPrefix("/icons/", http.FileServer(http.Dir("./web/icons"))))
 
 	log.Println("Server started on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))

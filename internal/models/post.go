@@ -309,3 +309,20 @@ func GetLikedPostsByUser(userID string) ([]Post, error) {
 
 	return posts, nil
 }
+
+func GetPostOwner(postID string) (string, error) {
+	var ownerID string
+	err := db.QueryRow(`
+        SELECT users.id 
+        FROM users
+        JOIN posts ON users.id = posts.user_id
+        WHERE posts.id = ?
+    `, postID).Scan(&ownerID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", nil // Пост не найден
+		}
+		return "", err
+	}
+	return ownerID, nil
+}

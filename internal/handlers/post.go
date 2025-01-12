@@ -73,7 +73,6 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 	err = models.LikePost(userID, postID)
 	if err != nil {
 		http.Error(w, "Error liking post: "+err.Error(), http.StatusInternalServerError)
-		ErrorHandler(w, r, http.StatusInternalServerError, "Error liking post")
 		return
 	}
 
@@ -81,6 +80,12 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error updating like count")
 		return
+	}
+
+	// Уведомление владельца поста
+	postOwnerID, err := models.GetPostOwner(postID)
+	if err == nil && postOwnerID != userID {
+		_ = models.CreateNotification(postOwnerID, userID, "like", postID, "post")
 	}
 
 	referer := r.Header.Get("Referer")
@@ -116,6 +121,12 @@ func DislikeHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error updating dislike count")
 		return
+	}
+
+	// Уведомление владельца поста
+	postOwnerID, err := models.GetPostOwner(postID)
+	if err == nil && postOwnerID != userID {
+		_ = models.CreateNotification(postOwnerID, userID, "dislike", postID, "post")
 	}
 
 	referer := r.Header.Get("Referer")
