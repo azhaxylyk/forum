@@ -9,13 +9,16 @@ import (
 )
 
 func main() {
+	// Инициализация базы данных
 	db, err := sql.InitDB()
 	if err != nil {
 		log.Fatal(err, "server shutdown")
 	}
 
+	// Установка базы данных для моделей
 	models.SetDB(db)
 
+	// Регистрация маршрутов
 	http.HandleFunc("/", handlers.MainPageHandler)
 	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)
@@ -29,13 +32,17 @@ func main() {
 	http.HandleFunc("/dislike_comment", handlers.DislikeCommentHandler)
 	http.HandleFunc("/my_posts", handlers.MyPostsHandler)
 	http.HandleFunc("/liked_posts", handlers.LikedPostsHandler)
+	http.HandleFunc("/profile", handlers.ProfilePageHandler) // Добавлен маршрут профиля
 	http.HandleFunc("/notifications", handlers.GetNotificationsHandler)
 	http.HandleFunc("/notifications/mark-as-read", handlers.MarkNotificationAsReadHandler)
 	http.HandleFunc("/notifications/mark-all-as-read", handlers.MarkAllNotificationsAsReadHandler)
 	http.HandleFunc("/notifications/unread-count", handlers.GetUnreadCountHandler)
+
+	// Обслуживание статических файлов
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
 	http.Handle("/icons/", http.StripPrefix("/icons/", http.FileServer(http.Dir("./web/icons"))))
 
+	// Запуск сервера
 	log.Println("Server started on http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

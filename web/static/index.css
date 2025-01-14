@@ -225,3 +225,19 @@ button:hover {
         height: 20px;
     }
 }
+
+.header-buttons .profile-button {
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    font-size: 16px;
+}
+
+.header-buttons .profile-icon {
+    width: 15px;
+    height: 15px;
+    filter: brightness(0) invert(1); /* Сделать белым */
+    transition: transform 0.3s ease; /* Добавить анимацию */
+}

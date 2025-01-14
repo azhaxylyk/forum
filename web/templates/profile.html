@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/index.css">
+    <link rel="stylesheet" href="/static/header.css">
+    <link rel="stylesheet" href="/static/footer.css">
+    <title>Profile - Activity</title>
+</head>
+<body>
+    <div class="page-container">
+        <header class="header">
+            <div class="container">
+                <h1><a href="/">Forum</a></h1>
+                <nav>
+                    <button onclick="window.location.href='/logout'">Logout</button>
+                </nav>
+            </div>
+        </header>
+
+        <div class="main-layout container">
+            <!-- ЛЕВАЯ ПАНЕЛЬ -->
+            <aside class="sidebar">
+                <p>Hello, {{if .LoggedIn}}{{.Username}}{{else}}Guest{{end}}!</p>
+                <br>
+                <h2>Profile Navigation</h2>
+                <ul>
+                    <li><a href="/profile">My Posts</a></li>
+                    <li><a href="/profile?section=comments">My Comments</a></li>
+                    <li><a href="/profile?section=likes">My Likes</a></li>
+                    <li><a href="/profile?section=dislikes">My Dislikes</a></li>
+                </ul>
+            </aside>
+
+            <!-- ОСНОВНОЙ КОНТЕНТ -->
+            <main class="content">  
+                {{if eq .Section "comments"}}
+                    <section class="activity-section">
+                        <h3>My Comments</h3>
+                        {{if .Comments}}
+                            {{range .Comments}}
+                                <div class="comment">
+                                    <p>{{.Content}}</p>
+                                    <p>On post <a href="/post?id={{.PostID}}">#{{.PostID}}</a></p>
+                                </div>
+                            {{end}}
+                        {{else}}
+                            <p>You haven't made any comments yet.</p>
+                        {{end}}
+                    </section>
+                {{else if eq .Section "likes"}}
+                    <section class="activity-section">
+                        <h3>Liked Posts</h3>
+                        {{if .LikedPosts}}
+                            {{range .LikedPosts}}
+                                <div class="post">
+                                    <p>{{.Content}}</p>
+                                    <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
+                                    <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
+                                </div>
+                            {{end}}
+                        {{else}}
+                            <p>You haven't liked any posts yet.</p>
+                        {{end}}
+                    </section>
+                {{else if eq .Section "dislikes"}}
+                    <section class="activity-section">
+                        <h3>Disliked Posts</h3>
+                        {{if .DislikedPosts}}
+                            {{range .DislikedPosts}}
+                                <div class="post">
+                                    <p>{{.Content}}</p>
+                                    <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
+                                    <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
+                                </div>
+                            {{end}}
+                        {{else}}
+                            <p>You haven't disliked any posts yet.</p>
+                        {{end}}
+                    </section>
+                {{else}}
+                    <section class="activity-section">
+                        <h3>My Posts</h3>
+                        {{if .Posts}}
+                            {{range .Posts}}
+                                <div class="post">
+                                    <p>{{.Content}}</p>
+                                    <p>On {{.CreatedAtFormatted}}</p>
+                                    <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
+                                </div>
+                            {{end}}
+                        {{else}}
+                            <p>You haven't created any posts yet.</p>
+                        {{end}}
+                    </section>
+                {{end}}
+            </main> 
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 Forum</p>
+        </footer>
+    </div>
+</body>
+</html>

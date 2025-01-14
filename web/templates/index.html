@@ -16,13 +16,13 @@
                 <nav>
                     {{if .LoggedIn}}
                         <div class="header-buttons">
-                            <button onclick="window.location.href='/my_posts'">My Posts</button>
-                            <button onclick="window.location.href='/liked_posts'">Liked Posts</button>
                             <button class="notification-button" onclick="openNotificationsModal()">
                                 <img src="/static/icons/notification.png" class="notification-icon">
                                 <span class="notification-count">{{.UnreadNotificationsCount}}</span>
                             </button>
-                            <button onclick="window.location.href='/logout'">Logout</button>
+                            <button onclick="window.location.href='/profile'" class="profile-button">
+                                <img src="/static/icons/profile-user.png" alt="Profile" class="profile-icon">
+                            </button>
                         </div>
                     {{else}}
                         <div class="header-buttons">

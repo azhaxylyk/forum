@@ -102,8 +102,10 @@ func DislikePost(userID, postID string) error {
 	var interactionID string
 	var isLike bool
 
+	// Получаем текущую запись для пользователя и поста
 	err := db.QueryRow("SELECT id, is_like FROM post_likes WHERE user_id = ? AND post_id = ?", userID, postID).Scan(&interactionID, &isLike)
 	if err == sql.ErrNoRows {
+		// Если записи нет, создаем новую с is_like = FALSE (дизлайк)
 		dislikeID, _ := uuid.NewV4()
 		_, err = db.Exec("INSERT INTO post_likes (id, user_id, post_id, is_like) VALUES (?, ?, ?, FALSE)", dislikeID.String(), userID, postID)
 		return err
@@ -111,11 +113,13 @@ func DislikePost(userID, postID string) error {
 		return err
 	}
 
+	// Если это дизлайк, удаляем запись
 	if !isLike {
 		_, err = db.Exec("DELETE FROM post_likes WHERE user_id = ? AND post_id = ?", userID, postID)
 		return err
 	}
 
+	// Если это лайк, обновляем на дизлайк
 	_, err = db.Exec("UPDATE post_likes SET is_like = FALSE WHERE id = ?", interactionID)
 	return err
 }
@@ -235,79 +239,6 @@ func GetPostByID(postID string) (Post, error) {
 	post.CreatedAtFormatted = createdAt.Format("02.01.2006 15:04")
 
 	return post, nil
-}
-
-func GetPostsByUser(userID string) ([]Post, error) {
-	rows, err := db.Query(`
-        SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
-        FROM posts
-        JOIN users ON posts.user_id = users.id
-        WHERE posts.user_id = ?
-        ORDER BY posts.created_at DESC
-    `, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var post Post
-		var createdAt time.Time
-
-		err = rows.Scan(&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
-		if err != nil {
-			return nil, err
-		}
-
-		categories, err := GetCategoriesForPost(post.ID)
-		if err != nil {
-			return nil, err
-		}
-		post.Categories = categories
-
-		post.CreatedAtFormatted = createdAt.Format("02.01.2006 15:04")
-		posts = append(posts, post)
-	}
-
-	return posts, nil
-}
-
-func GetLikedPostsByUser(userID string) ([]Post, error) {
-	rows, err := db.Query(`
-        SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
-        FROM posts
-        JOIN users ON posts.user_id = users.id
-        JOIN post_likes ON posts.id = post_likes.post_id
-        WHERE post_likes.user_id = ?
-        ORDER BY posts.created_at DESC
-    `, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	var posts []Post
-	for rows.Next() {
-		var post Post
-		var createdAt time.Time
-
-		err = rows.Scan(&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
-		if err != nil {
-			return nil, err
-		}
-
-		categories, err := GetCategoriesForPost(post.ID)
-		if err != nil {
-			return nil, err
-		}
-		post.Categories = categories
-
-		post.CreatedAtFormatted = createdAt.Format("02.01.2006 15:04")
-		posts = append(posts, post)
-	}
-
-	return posts, nil
 }
 
 func GetPostOwner(postID string) (string, error) {

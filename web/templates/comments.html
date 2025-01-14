@@ -16,9 +16,8 @@
                 <nav>
                     {{if .LoggedIn}}
                         <div class="header-buttons">
-                            <button onclick="window.location.href='/my_posts'">My Posts</button>
-                            <button onclick="window.location.href='/liked_posts'">Liked Posts</button>
-                            <button onclick="window.location.href='/logout'">Logout</button>
+                            <button onclick="window.location.href='/profile'" class="profile-button">
+                            </button>
                         </div>
                     {{else}}
                         <div class="header-buttons">
