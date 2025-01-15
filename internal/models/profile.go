@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"time"
 )
@@ -150,6 +151,6 @@ func GetCommentsByUser(userID string) ([]map[string]interface{}, error) {
 			"PostContent": postContent,
 		})
 	}
-
+	fmt.Println(results)
 	return results, nil
 }

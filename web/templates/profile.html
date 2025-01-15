@@ -41,8 +41,12 @@
                         {{if .Comments}}
                             {{range .Comments}}
                                 <div class="comment">
-                                    <p>{{.Content}}</p>
-                                    <p>On post <a href="/post?id={{.PostID}}">#{{.PostID}}</a></p>
+                                    <p class="comment-content">{{.Comment.Content}}</p>
+                                    <p class="comment-meta">
+                                        On post: 
+                                        <a href="/post?id={{.Comment.PostID}}" class="post-link">View Post</a> 
+                                        | <span class="comment-date">{{.Comment.CreatedAtFormatted}}</span>
+                                    </p>
                                 </div>
                             {{end}}
                         {{else}}

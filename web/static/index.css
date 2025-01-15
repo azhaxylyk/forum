@@ -241,3 +241,37 @@ button:hover {
     filter: brightness(0) invert(1); /* Сделать белым */
     transition: transform 0.3s ease; /* Добавить анимацию */
 }
+
+.comment {
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #1e1e1e;
+}
+
+.comment-content {
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+    color: #e0e0e0;
+}
+
+.comment-meta {
+    font-size: 14px;
+    color: #666;
+}
+
+.post-link {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.post-link:hover {
+    text-decoration: underline;
+}
+
+.comment-date {
+    font-style: italic;
+    color: #888;
+}
