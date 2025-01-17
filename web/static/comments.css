@@ -4,6 +4,12 @@ body {
     color: #e0e0e0;
 }
 
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
 .page-container {
     display: flex;
     flex-direction: column;
@@ -71,4 +77,29 @@ textarea {
 textarea, button {
     max-width: 100%;
     box-sizing: border-box;
+}
+
+.edit-delete-buttons {
+    margin-top: 10px;
+}
+.edit-delete-buttons form {
+    display: inline;
+    margin-right: 10px;
+}
+
+
+.header-buttons .profile-button {
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    font-size: 16px;
+}
+
+.header-buttons .profile-icon {
+    width: 15px;
+    height: 15px;
+    filter: brightness(0) invert(1); /* Сделать белым */
+    transition: transform 0.3s ease; /* Добавить анимацию */
 }

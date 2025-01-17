@@ -257,3 +257,46 @@ func GetPostOwner(postID string) (string, error) {
 	}
 	return ownerID, nil
 }
+
+func DeletePost(postID string) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return err
+	}
+
+	// Удаляем связанные категории поста
+	_, err = tx.Exec("DELETE FROM post_categories WHERE post_id = ?", postID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Удаляем лайки и дизлайки поста
+	_, err = tx.Exec("DELETE FROM post_likes WHERE post_id = ?", postID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Удаляем комментарии, связанные с постом
+	_, err = tx.Exec("DELETE FROM comments WHERE post_id = ?", postID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Удаляем сам пост
+	_, err = tx.Exec("DELETE FROM posts WHERE id = ?", postID)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Фиксируем транзакцию
+	return tx.Commit()
+}
+
+func UpdatePost(postID, content string) error {
+	_, err := db.Exec("UPDATE posts SET content = ? WHERE id = ?", content, postID)
+	return err
+}

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"fmt"
 	"forum/internal/models"
 	"html/template"
 	"net/http"
@@ -198,4 +199,88 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tmpl.Execute(w, data)
+}
+
+func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		return
+	}
+
+	cookie, err := r.Cookie("session_token")
+	if err != nil || cookie.Value == "" {
+		ErrorHandler(w, r, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	userID, _, err := models.GetIDBySessionToken(cookie.Value)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	postID := r.FormValue("post_id")
+	ownerID, err := models.GetPostOwner(postID)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusInternalServerError, "Error fetching post owner")
+		return
+	}
+
+	// Проверяем, является ли пользователь владельцем поста
+	if ownerID != userID {
+		ErrorHandler(w, r, http.StatusForbidden, "You are not allowed to delete this post")
+		return
+	}
+
+	err = models.DeletePost(postID)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusInternalServerError, "Error deleting post")
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func EditPostHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		ErrorHandler(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
+		fmt.Println('d')
+		return
+	}
+
+	cookie, err := r.Cookie("session_token")
+	if err != nil || cookie.Value == "" {
+		ErrorHandler(w, r, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	userID, _, err := models.GetIDBySessionToken(cookie.Value)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
+		return
+	}
+
+	postID := r.FormValue("post_id")
+	newContent := r.FormValue("content")
+	fmt.Println(postID, newContent)
+
+	ownerID, err := models.GetPostOwner(postID)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusInternalServerError, "Error fetching post owner")
+		return
+	}
+
+	// Проверяем, является ли пользователь владельцем поста
+	if ownerID != userID {
+		ErrorHandler(w, r, http.StatusForbidden, "You are not allowed to edit this post")
+		return
+	}
+
+	err = models.UpdatePost(postID, newContent)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusInternalServerError, "Error updating post")
+		return
+	}
+
+	http.Redirect(w, r, "/post?id="+postID, http.StatusSeeOther)
 }
