@@ -26,6 +26,59 @@ var googleOAuthConfig = &oauth2.Config{
 	Endpoint:     google.Endpoint,
 }
 
+var githubOAuthConfig = &oauth2.Config{
+	ClientID:     "Ov23liLxsRM71uKlB8vB",                     // Замени на Client ID
+	ClientSecret: "d09213d471a0ceccfc39ad0409be7599ee8c9040", // Замени на Client Secret
+	RedirectURL:  "http://localhost:8080/auth/github/callback",
+	Scopes:       []string{"user:email"},
+	Endpoint: oauth2.Endpoint{
+		AuthURL:  "https://github.com/login/oauth/authorize",
+		TokenURL: "https://github.com/login/oauth/access_token",
+	},
+}
+
+func GitHubAuthHandler(w http.ResponseWriter, r *http.Request) {
+	url := githubOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
+
+func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	code := r.URL.Query().Get("code")
+	token, err := githubOAuthConfig.Exchange(context.Background(), code)
+	if err != nil {
+		log.Println("GitHub OAuth2 exchange failed:", err)
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		return
+	}
+
+	client := githubOAuthConfig.Client(context.Background(), token)
+	userInfo, err := getGitHubUserInfo(client)
+	if err != nil {
+		log.Println("Failed to get GitHub user info:", err)
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		return
+	}
+
+	// Проверка или создание пользователя в базе данных
+	sessionToken, err := models.AuthenticateOrRegisterOAuthUser(userInfo.Email, userInfo.Name, "github")
+	if err != nil {
+		log.Println("Failed to authenticate/register user:", err)
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		return
+	}
+
+	// Установка куки с токеном сессии
+	cookie := http.Cookie{
+		Name:    "session_token",
+		Value:   sessionToken,
+		Expires: time.Now().Add(24 * time.Hour),
+		Path:    "/",
+	}
+	http.SetCookie(w, &cookie)
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
 func GoogleAuthHandler(w http.ResponseWriter, r *http.Request) {
 	url := googleOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
@@ -206,4 +259,53 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 
 func isValidEmail(email string) bool {
 	return emailRegex.MatchString(email)
+}
+
+func getGitHubUserInfo(client *http.Client) (*models.OAuthUserInfo, error) {
+	resp, err := client.Get("https://api.github.com/user")
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	type GitHubUser struct {
+		Email string `json:"email"`
+		Name  string `json:"name"`
+	}
+
+	var user GitHubUser
+	err = json.NewDecoder(resp.Body).Decode(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	// Если email отсутствует (бывает на GitHub), нужно запросить email отдельно
+	if user.Email == "" {
+		emailResp, err := client.Get("https://api.github.com/user/emails")
+		if err != nil {
+			return nil, err
+		}
+		defer emailResp.Body.Close()
+
+		var emails []struct {
+			Email   string `json:"email"`
+			Primary bool   `json:"primary"`
+		}
+		err = json.NewDecoder(emailResp.Body).Decode(&emails)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, e := range emails {
+			if e.Primary {
+				user.Email = e.Email
+				break
+			}
+		}
+	}
+
+	return &models.OAuthUserInfo{
+		Email: user.Email,
+		Name:  user.Name,
+	}, nil
 }

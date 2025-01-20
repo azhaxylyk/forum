@@ -20,6 +20,8 @@ func main() {
 
 	http.HandleFunc("/auth/google", handlers.GoogleAuthHandler)
 	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
+	http.HandleFunc("/auth/github", handlers.GitHubAuthHandler)
+	http.HandleFunc("/auth/github/callback", handlers.GitHubCallbackHandler)
 
 	// Регистрация маршрутов
 	http.HandleFunc("/", handlers.MainPageHandler)

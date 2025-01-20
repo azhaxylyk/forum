@@ -33,8 +33,8 @@ func AuthenticateOrRegisterOAuthUser(email, username, provider string) (string, 
 			}
 			sessionToken := sessionUUID.String() // Преобразуем UUID в строку
 
-			_, err = db.Exec("INSERT INTO users (id, email, username, session_token) VALUES (?, ?, ?, ?)",
-				userID, email, username, sessionToken)
+			_, err = db.Exec("INSERT INTO users (id, email, username, provider, session_token) VALUES (?, ?, ?, ?, ?)",
+				userID, email, username, provider, sessionToken)
 			if err != nil {
 				return "", err
 			}
