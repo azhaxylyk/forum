@@ -3,5 +3,6 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT UNIQUE,
     username TEXT UNIQUE,
     password TEXT,
-    session_token TEXT
+    session_token TEXT,
+    provider TEXT
 );

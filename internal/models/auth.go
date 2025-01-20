@@ -8,6 +8,56 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type OAuthUserInfo struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
+func AuthenticateOrRegisterOAuthUser(email, username, provider string) (string, error) {
+	var userID string
+
+	// Проверяем, существует ли пользователь с таким email
+	err := db.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Если пользователя нет, регистрируем его
+			newUUID, err := uuid.NewV4() // Создаем UUID
+			if err != nil {
+				return "", err
+			}
+			userID = newUUID.String() // Преобразуем UUID в строку
+
+			sessionUUID, err := uuid.NewV4() // Создаем токен сессии
+			if err != nil {
+				return "", err
+			}
+			sessionToken := sessionUUID.String() // Преобразуем UUID в строку
+
+			_, err = db.Exec("INSERT INTO users (id, email, username, session_token) VALUES (?, ?, ?, ?)",
+				userID, email, username, sessionToken)
+			if err != nil {
+				return "", err
+			}
+			return sessionToken, nil
+		}
+		return "", err
+	}
+
+	// Если пользователь уже существует, обновляем токен сессии
+	sessionUUID, err := uuid.NewV4() // Создаем новый токен сессии
+	if err != nil {
+		return "", err
+	}
+	sessionToken := sessionUUID.String() // Преобразуем UUID в строку
+
+	_, err = db.Exec("UPDATE users SET session_token = ? WHERE id = ?", sessionToken, userID)
+	if err != nil {
+		return "", err
+	}
+
+	return sessionToken, nil
+}
+
 func CheckEmailExists(email string) (bool, error) {
 	var exists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)", email).Scan(&exists)
@@ -26,21 +76,24 @@ func RegisterUser(email, username, password string) (string, error) {
 		return "", err
 	}
 
-	userID, err := uuid.NewV4()
+	newUUID, err := uuid.NewV4()
 	if err != nil {
 		return "", err
 	}
-	sessionToken, err := uuid.NewV4()
+	userID := newUUID.String()
+
+	sessionUUID, err := uuid.NewV4()
 	if err != nil {
 		return "", err
 	}
+	sessionToken := sessionUUID.String()
 
 	_, err = db.Exec("INSERT INTO users (id, email, username, password, session_token) VALUES (?, ?, ?, ?, ?)",
-		userID.String(), email, username, hashedPassword, sessionToken.String())
+		userID, email, username, hashedPassword, sessionToken)
 	if err != nil {
 		return "", err
 	}
-	return sessionToken.String(), err
+	return sessionToken, nil
 }
 
 func AuthenticateUser(email, password string) (string, error) {
@@ -59,13 +112,15 @@ func AuthenticateUser(email, password string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	sessionToken, _ := uuid.NewV4()
-	_, err = db.Exec("UPDATE users SET session_token = ? WHERE id = ?", sessionToken.String(), userID)
+	sessionUUID, _ := uuid.NewV4()
+	sessionToken := sessionUUID.String()
+
+	_, err = db.Exec("UPDATE users SET session_token = ? WHERE id = ?", sessionToken, userID)
 	if err != nil {
 		return "", err
 	}
 
-	return sessionToken.String(), nil
+	return sessionToken, nil
 }
 
 func GetIDBySessionToken(sessionToken string) (string, string, error) {

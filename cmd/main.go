@@ -18,6 +18,9 @@ func main() {
 	// Установка базы данных для моделей
 	models.SetDB(db)
 
+	http.HandleFunc("/auth/google", handlers.GoogleAuthHandler)
+	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
+
 	// Регистрация маршрутов
 	http.HandleFunc("/", handlers.MainPageHandler)
 	http.HandleFunc("/register", handlers.RegisterHandler)
