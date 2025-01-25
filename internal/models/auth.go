@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
@@ -61,38 +62,53 @@ func AuthenticateOrRegisterOAuthUser(email, username, provider string) (string, 
 func CheckEmailExists(email string) (bool, error) {
 	var exists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)", email).Scan(&exists)
+	if err != nil {
+		log.Printf("Error checking if email exists: %v", err)
+	}
 	return exists, err
 }
 
 func CheckUsernameExists(username string) (bool, error) {
 	var exists bool
 	err := db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE username = ?)", username).Scan(&exists)
+	if err != nil {
+		log.Printf("Error checking if username exists: %v", err)
+	}
 	return exists, err
 }
 
 func RegisterUser(email, username, password string) (string, error) {
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
+		log.Printf("Error hashing password: %v", err)
 		return "", err
 	}
 
 	newUUID, err := uuid.NewV4()
 	if err != nil {
+		log.Printf("Error generating user UUID: %v", err)
 		return "", err
 	}
 	userID := newUUID.String()
 
 	sessionUUID, err := uuid.NewV4()
 	if err != nil {
+		log.Printf("Error generating session UUID: %v", err)
 		return "", err
 	}
 	sessionToken := sessionUUID.String()
 
-	_, err = db.Exec("INSERT INTO users (id, email, username, password, session_token) VALUES (?, ?, ?, ?, ?)",
-		userID, email, username, hashedPassword, sessionToken)
+	// Устанавливаем провайдера (например, "email" для обычной регистрации)
+	provider := "email"
+
+	_, err = db.Exec("INSERT INTO users (id, email, username, password, session_token, role, provider) VALUES (?, ?, ?, ?, ?, ?, ?)",
+		userID, email, username, hashedPassword, sessionToken, "user", provider)
 	if err != nil {
+		log.Printf("Error inserting user into database: %v", err)
 		return "", err
 	}
+
 	return sessionToken, nil
 }
 

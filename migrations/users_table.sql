@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS users (
-	id VARCHAR(36) PRIMARY KEY,
-	email VARCHAR(255) UNIQUE NOT NULL,
-	username VARCHAR(255) NOT NULL,
-	session_token VARCHAR(255),
-	provider VARCHAR(50) NOT NULL, -- Для Google/GitHub
-	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    username VARCHAR(255) NOT NULL,
+	password TEXT,
+    session_token VARCHAR(255),
+    provider VARCHAR(50) NOT NULL, -- Для Google/GitHub
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 );

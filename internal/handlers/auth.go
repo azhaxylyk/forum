@@ -145,48 +145,59 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 		if email == "" || username == "" || password == "" {
 			ErrorHandler(w, r, http.StatusBadRequest, "All fields are required")
+			log.Println("Error: Missing required fields")
 			return
 		}
 
 		if !isValidEmail(email) {
 			ErrorHandler(w, r, http.StatusBadRequest, "Invalid email format")
+			log.Println("Error: Invalid email format")
 			return
 		}
 
+		// Проверка, существует ли email в базе данных
 		emailExists, err := models.CheckEmailExists(email)
 		if err != nil {
+			log.Printf("Error checking if email exists: %v", err)
 			ErrorHandler(w, r, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 		if emailExists {
 			renderTemplateWithError(w, "register", "Email is already registered")
+			log.Println("Error: Email already exists")
 			return
 		}
 
+		// Проверка, существует ли username в базе данных
 		usernameExists, err := models.CheckUsernameExists(username)
 		if err != nil {
+			log.Printf("Error checking if username exists: %v", err)
 			ErrorHandler(w, r, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 		if usernameExists {
 			renderTemplateWithError(w, "register", "Username is already taken")
+			log.Println("Error: Username already exists")
 			return
 		}
 
+		// Регистрация пользователя
 		sessionToken, err := models.RegisterUser(email, username, password)
 		if err != nil {
+			log.Printf("Error during user registration: %v", err)
 			ErrorHandler(w, r, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))
 			return
 		}
 
+		// Установка куки с токеном сессии
 		cookie := http.Cookie{
 			Name:     "session_token",
 			Value:    sessionToken,
 			Expires:  time.Now().Add(24 * time.Hour),
-			Path:     "/",                  // Доступ к куки на всех маршрутах
-			HttpOnly: true,                 // Защита от доступа через JavaScript
-			Secure:   false,                // Для локального тестирования
-			SameSite: http.SameSiteLaxMode, // Уменьшение риска CSRF
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
 		}
 
 		http.SetCookie(w, &cookie)
