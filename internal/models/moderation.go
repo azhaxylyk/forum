@@ -18,7 +18,7 @@ type ModerationRequest struct {
 	UserID      string
 	Type        string
 	Reason      string
-	PostID      sql.NullString // Null, если запрос не связан с постом
+	PostID      sql.NullString
 	Status      string
 	CreatedAt   time.Time
 	PostContent template.HTML
@@ -88,7 +88,6 @@ func DeletePostByAdmin(postID string, reason string) error {
 		return err
 	}
 
-	// Удаление поста и связанных данных
 	_, err = tx.Exec("DELETE FROM post_categories WHERE post_id = ?", postID)
 	if err != nil {
 		tx.Rollback()
@@ -113,14 +112,12 @@ func DeletePostByAdmin(postID string, reason string) error {
 		return err
 	}
 
-	// Фиксируем транзакцию
 	return tx.Commit()
 }
 
 func GetModerationRequestByID(requestID int) (*ModerationRequest, error) {
 	var request ModerationRequest
 
-	// Выполняем запрос к базе данных для получения данных о запросе по ID
 	row := db.QueryRow(`
         SELECT id, user_id, type, reason, post_id, status
         FROM moderation_requests
@@ -129,9 +126,9 @@ func GetModerationRequestByID(requestID int) (*ModerationRequest, error) {
 	err := row.Scan(&request.ID, &request.UserID, &request.Type, &request.Reason, &request.PostID, &request.Status)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil // Если запрос не найден, возвращаем nil
+			return nil, nil
 		}
-		return nil, err // В случае другой ошибки возвращаем ошибку
+		return nil, err
 	}
 
 	return &request, nil
