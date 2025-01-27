@@ -13,10 +13,9 @@ type TemplateData struct {
 		Message             string
 		ReceivedAtFormatted string
 	}
-	UnreadNotificationsCount int // Новое поле
+	UnreadNotificationsCount int
 }
 
-// GetNotificationsHandler обрабатывает запросы для получения уведомлений пользователя
 func GetNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		ErrorHandler(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
@@ -35,21 +34,18 @@ func GetNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получаем список уведомлений
 	notifications, err := models.GetNotificationsForUser(userID)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error retrieving notifications")
 		return
 	}
 
-	// Получаем количество непрочитанных уведомлений
 	unreadCount, err := models.GetUnreadNotificationCount(userID)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error retrieving unread notification count")
 		return
 	}
 
-	// Формируем данные для шаблона
 	var templateNotifications []struct {
 		Message             string
 		ReceivedAtFormatted string
@@ -71,23 +67,20 @@ func GetNotificationsHandler(w http.ResponseWriter, r *http.Request) {
 
 	data := TemplateData{
 		Notifications:            templateNotifications,
-		UnreadNotificationsCount: unreadCount, // Устанавливаем значение
+		UnreadNotificationsCount: unreadCount,
 	}
 
-	// Загружаем шаблон
 	tmpl, err := template.ParseFiles("web/templates/notifications.html")
 	if err != nil {
 		http.Error(w, "Error loading template", http.StatusInternalServerError)
 		return
 	}
 
-	// Отображаем шаблон
 	if err = tmpl.Execute(w, data); err != nil {
 		fmt.Println(err)
 	}
 }
 
-// MarkNotificationAsReadHandler обрабатывает запрос для пометки одного уведомления как прочитанного
 func MarkNotificationAsReadHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
@@ -106,28 +99,24 @@ func MarkNotificationAsReadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Помечаем уведомление как прочитанное
 	err = models.MarkNotificationAsRead(notificationID)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error marking notification as read")
 		return
 	}
 
-	// Получаем userID из сессии
 	userID, _, err := models.GetIDBySessionToken(cookie.Value)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusUnauthorized, "Invalid session token")
 		return
 	}
 
-	// Удаляем прочитанные уведомления
 	err = models.DeleteReadNotifications(userID)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error deleting read notifications")
 		return
 	}
 
-	// Возвращаемся на страницу уведомлений
 	http.Redirect(w, r, "/notifications", http.StatusSeeOther)
 }
 
@@ -149,14 +138,12 @@ func MarkAllNotificationsAsReadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Помечаем все уведомления как прочитанные
 	err = models.MarkAllNotificationsAsRead(userID)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error marking all notifications as read")
 		return
 	}
 
-	// Удаляем прочитанные уведомления
 	err = models.DeleteReadNotifications(userID)
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error deleting read notifications")

@@ -19,7 +19,6 @@ type Notification struct {
 	CreatedAtFormatted string
 }
 
-// CreateNotification создает новое уведомление
 func CreateNotification(userID, actionBy, actionType, targetID, targetType string) error {
 	notificationID, err := uuid.NewV4()
 	if err != nil {
@@ -33,7 +32,6 @@ func CreateNotification(userID, actionBy, actionType, targetID, targetType strin
 	return err
 }
 
-// GetNotificationsForUser возвращает уведомления для пользователя
 func GetNotificationsForUser(userID string) ([]Notification, error) {
 	rows, err := db.Query(`
 		SELECT id, action_by, action_type, target_id, target_type, is_read, created_at
@@ -65,13 +63,11 @@ func GetNotificationsForUser(userID string) ([]Notification, error) {
 		}
 		notification.CreatedAt = createdAt
 		notification.CreatedAtFormatted = createdAt.Format("02.01.2006 15:04")
-		fmt.Printf("Fetched notification: %+v\n", notification)
 		notifications = append(notifications, notification)
 	}
 	return notifications, nil
 }
 
-// MarkNotificationAsRead помечает уведомление как прочитанное
 func MarkNotificationAsRead(notificationID string) error {
 	_, err := db.Exec(`
 		UPDATE notifications
@@ -81,7 +77,6 @@ func MarkNotificationAsRead(notificationID string) error {
 	return err
 }
 
-// MarkAllNotificationsAsRead помечает все уведомления пользователя как прочитанные
 func MarkAllNotificationsAsRead(userID string) error {
 	_, err := db.Exec(`
 		UPDATE notifications
@@ -91,7 +86,6 @@ func MarkAllNotificationsAsRead(userID string) error {
 	return err
 }
 
-// DeleteReadNotifications удаляет прочитанные уведомления пользователя
 func DeleteReadNotifications(userID string) error {
 	_, err := db.Exec(`
 		DELETE FROM notifications
@@ -101,13 +95,11 @@ func DeleteReadNotifications(userID string) error {
 }
 
 func (n *Notification) GetMessage() (string, error) {
-	// Получаем имя пользователя, который совершил действие
 	username, err := GetUsernameByID(n.ActionBy)
 	if err != nil {
 		return "", err
 	}
 
-	// Формируем сообщение на основе типа действия и цели
 	switch n.ActionType {
 	case "comment":
 		return fmt.Sprintf("%s commented on your post.", username), nil
@@ -124,23 +116,18 @@ func (n *Notification) GetMessage() (string, error) {
 			return fmt.Sprintf("%s disliked your comment.", username), nil
 		}
 	case "approve_del":
-		// Сообщение о том, что пост был удален администратором
 		return "Your request has been approved", nil
 	case "approve_mod":
-		// Сообщение о том, что пользователь был утвержден как модератор
 		return "Admin has approved you as a moderator.", nil
 	case "reject_mod":
-		// Сообщение о том, что пользователь был отклонен как модератор
 		return "Admin has rejected your application to be a moderator.", nil
 	case "reject_del":
-		// Сообщение о том, что запрос на удаление поста был отклонен
 		return "Your request to delete the post has been rejected.", nil
 	}
 
 	return "You have a new notification.", nil
 }
 
-// GetUsernameByID получает имя пользователя по его ID
 func GetUsernameByID(userID string) (string, error) {
 	var username string
 	err := db.QueryRow(`SELECT username FROM users WHERE id = ?`, userID).Scan(&username)
@@ -150,7 +137,6 @@ func GetUsernameByID(userID string) (string, error) {
 	return username, nil
 }
 
-// GetUnreadNotificationCount возвращает количество непрочитанных уведомлений для пользователя
 func GetUnreadNotificationCount(userID string) (int, error) {
 	var count int
 	err := db.QueryRow(`

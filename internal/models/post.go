@@ -102,10 +102,8 @@ func DislikePost(userID, postID string) error {
 	var interactionID string
 	var isLike bool
 
-	// Получаем текущую запись для пользователя и поста
 	err := db.QueryRow("SELECT id, is_like FROM post_likes WHERE user_id = ? AND post_id = ?", userID, postID).Scan(&interactionID, &isLike)
 	if err == sql.ErrNoRows {
-		// Если записи нет, создаем новую с is_like = FALSE (дизлайк)
 		dislikeID, _ := uuid.NewV4()
 		_, err = db.Exec("INSERT INTO post_likes (id, user_id, post_id, is_like) VALUES (?, ?, ?, FALSE)", dislikeID.String(), userID, postID)
 		return err
@@ -113,13 +111,11 @@ func DislikePost(userID, postID string) error {
 		return err
 	}
 
-	// Если это дизлайк, удаляем запись
 	if !isLike {
 		_, err = db.Exec("DELETE FROM post_likes WHERE user_id = ? AND post_id = ?", userID, postID)
 		return err
 	}
 
-	// Если это лайк, обновляем на дизлайк
 	_, err = db.Exec("UPDATE post_likes SET is_like = FALSE WHERE id = ?", interactionID)
 	return err
 }
@@ -251,7 +247,7 @@ func GetPostOwner(postID string) (string, error) {
     `, postID).Scan(&ownerID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", nil // Пост не найден
+			return "", nil
 		}
 		return "", err
 	}
@@ -264,35 +260,30 @@ func DeletePost(postID string) error {
 		return err
 	}
 
-	// Удаляем связанные категории поста
 	_, err = tx.Exec("DELETE FROM post_categories WHERE post_id = ?", postID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	// Удаляем лайки и дизлайки поста
 	_, err = tx.Exec("DELETE FROM post_likes WHERE post_id = ?", postID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	// Удаляем комментарии, связанные с постом
 	_, err = tx.Exec("DELETE FROM comments WHERE post_id = ?", postID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	// Удаляем сам пост
 	_, err = tx.Exec("DELETE FROM posts WHERE id = ?", postID)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
-	// Фиксируем транзакцию
 	return tx.Commit()
 }
 

@@ -78,7 +78,6 @@ func GetLikedPostsByUser(userID string) ([]Post, error) {
 	return posts, nil
 }
 
-// GetDislikedPostsByUser retrieves posts disliked by a specific user
 func GetDislikedPostsByUser(userID string) ([]Post, error) {
 	rows, err := db.Query(`
         SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username

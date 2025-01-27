@@ -8,7 +8,6 @@ import (
 )
 
 func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
-	// Получение данных пользователя из cookie
 	cookie, err := r.Cookie("session_token")
 	if err != nil || cookie.Value == "" {
 		ErrorHandler(w, r, http.StatusUnauthorized, "Please log in to view your profile")
@@ -22,7 +21,6 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Определение текущего раздела
 	section := r.URL.Query().Get("section")
 
 	var (
@@ -59,7 +57,6 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Загрузка шаблона
 	tmpl, err := template.ParseFiles("web/templates/profile.html")
 	if err != nil {
 		log.Printf("Template loading error: %v", err)
@@ -67,7 +64,6 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Подготовка данных для шаблона
 	data := struct {
 		LoggedIn      bool
 		Username      string
@@ -86,7 +82,6 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		Comments:      comments,
 	}
 
-	// Выполнение шаблона с данными
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println("Error executing template:", err)

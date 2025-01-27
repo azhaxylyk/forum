@@ -12,7 +12,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 	loggedIn := false
 	var userID string
 
-	// Получение данных пользователя из cookie
 	cookie, err := r.Cookie("session_token")
 	if err == nil {
 		sessionToken := cookie.Value
@@ -22,7 +21,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Получение фильтрованных постов
 	categoryID := r.URL.Query().Get("category")
 	posts, err := models.GetFilteredPosts(loggedIn, userID, categoryID)
 	if err != nil {
@@ -30,14 +28,12 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получение всех категорий
 	categories, err := models.GetAllCategories()
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error fetching categories")
 		return
 	}
 
-	// Получение уведомлений пользователя (если он вошел)
 	var notifications []models.Notification
 	var formattedNotifications []struct {
 		models.Notification
@@ -51,7 +47,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Формирование сообщений для каждого уведомления
 		for _, n := range notifications {
 			message, err := n.GetMessage()
 			if err != nil {
@@ -67,7 +62,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
-		// Получение количества непрочитанных уведомлений
 		unreadCount, err = models.GetUnreadNotificationCount(userID)
 		if err != nil {
 			ErrorHandler(w, r, http.StatusInternalServerError, "Error retrieving unread notification count")
@@ -77,7 +71,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 
 	notification := r.URL.Query().Get("notification")
 
-	// Загрузка шаблона
 	tmpl, err := template.ParseFiles("web/templates/index.html")
 	if err != nil {
 		ErrorHandler(w, r, http.StatusInternalServerError, "Error loading template")
@@ -88,7 +81,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Подготовка данных для передачи в шаблон
 	data := struct {
 		Posts         []models.Post
 		Categories    []models.Category
@@ -112,7 +104,6 @@ func MainPageHandler(w http.ResponseWriter, r *http.Request) {
 		UnreadNotificationsCount: unreadCount,
 	}
 
-	// Выполнение шаблона с подготовленными данными
 	err = tmpl.Execute(w, data)
 	if err != nil {
 		log.Println("Error executing template:", err)

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"database/sql"
-	"fmt"
 	"forum/internal/models"
 	"html/template"
 	"net/http"
@@ -83,7 +82,6 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Уведомление владельца поста
 	postOwnerID, err := models.GetPostOwner(postID)
 	if err == nil && postOwnerID != userID {
 		_ = models.CreateNotification(postOwnerID, userID, "like", postID, "post")
@@ -124,7 +122,6 @@ func DislikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Уведомление владельца поста
 	postOwnerID, err := models.GetPostOwner(postID)
 	if err == nil && postOwnerID != userID {
 		_ = models.CreateNotification(postOwnerID, userID, "dislike", postID, "post")
@@ -192,17 +189,16 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 		Comments     []models.Comment
 		LoggedIn     bool
 		Username     string
-		IsModerator  bool // Добавьте это поле
+		IsModerator  bool
 		Notification string
 	}{
 		Post:         post,
 		Comments:     comments,
 		LoggedIn:     loggedIn,
 		Username:     username,
-		IsModerator:  isModerator, // По умолчанию false, если пользователь не модератор
+		IsModerator:  isModerator,
 		Notification: notification,
 	}
-	fmt.Println(isModerator)
 	tmpl.Execute(w, data)
 }
 
@@ -231,7 +227,6 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверяем, является ли пользователь владельцем поста
 	if ownerID != userID {
 		ErrorHandler(w, r, http.StatusForbidden, "You are not allowed to delete this post")
 		return
@@ -249,7 +244,6 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, r, http.StatusMethodNotAllowed, http.StatusText(http.StatusMethodNotAllowed))
-		fmt.Println('d')
 		return
 	}
 
@@ -267,7 +261,6 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	postID := r.FormValue("post_id")
 	newContent := r.FormValue("content")
-	fmt.Println(postID, newContent)
 
 	ownerID, err := models.GetPostOwner(postID)
 	if err != nil {
@@ -275,7 +268,6 @@ func EditPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверяем, является ли пользователь владельцем поста
 	if ownerID != userID {
 		ErrorHandler(w, r, http.StatusForbidden, "You are not allowed to edit this post")
 		return

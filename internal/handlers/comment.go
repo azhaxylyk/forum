@@ -37,7 +37,6 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Уведомление владельца поста
 	postOwnerID, err := models.GetPostOwner(postID)
 	if err == nil && postOwnerID != userID {
 		_ = models.CreateNotification(postOwnerID, userID, "comment", postID, "post")
@@ -82,7 +81,6 @@ func LikeCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Получение владельца комментария для уведомления
 	commentOwnerID, err := models.GetCommentOwner(commentID)
 	if err == nil && commentOwnerID != userID {
 		_ = models.CreateNotification(commentOwnerID, userID, "like", commentID, "comment")
@@ -127,7 +125,6 @@ func DislikeCommentHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Уведомление владельца комментария
 	commentOwnerID, err := models.GetCommentOwner(commentID)
 	if err == nil && commentOwnerID != userID {
 		_ = models.CreateNotification(commentOwnerID, userID, "dislike", commentID, "comment")

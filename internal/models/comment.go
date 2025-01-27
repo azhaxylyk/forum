@@ -161,7 +161,7 @@ func GetCommentOwner(commentID string) (string, error) {
     `, commentID).Scan(&owner)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return "", nil // Комментарий не найден
+			return "", nil
 		}
 		return "", err
 	}

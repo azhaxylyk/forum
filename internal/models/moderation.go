@@ -44,10 +44,6 @@ func GetAllModerationRequests() ([]ModerationRequest, error) {
 		requests = append(requests, request)
 	}
 
-	if len(requests) == 0 {
-		fmt.Println("No requests found in the database")
-	}
-
 	return requests, nil
 }
 

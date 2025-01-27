@@ -17,29 +17,26 @@ type OAuthUserInfo struct {
 func AuthenticateOrRegisterOAuthUser(email, username, provider string, moderatorRequest bool) (string, error) {
 	var userID string
 
-	// Проверяем, существует ли пользователь с таким email
 	err := db.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			// Если пользователя нет, регистрируем его
-			newUUID, err := uuid.NewV4() // Создаем UUID
+			newUUID, err := uuid.NewV4()
 			if err != nil {
 				return "", err
 			}
-			userID = newUUID.String() // Преобразуем UUID в строку
+			userID = newUUID.String()
 			if moderatorRequest {
-				log.Printf("Creating moderation request for userID: %s", userID)
 				err = CreateModerationRequest(userID, "moderator_request", "User requested moderator status", "")
 				if err != nil {
 					log.Printf("Error creating moderation request: %v", err)
 					return "", err
 				}
 			}
-			sessionUUID, err := uuid.NewV4() // Создаем токен сессии
+			sessionUUID, err := uuid.NewV4()
 			if err != nil {
 				return "", err
 			}
-			sessionToken := sessionUUID.String() // Преобразуем UUID в строку
+			sessionToken := sessionUUID.String()
 
 			_, err = db.Exec("INSERT INTO users (id, email, username, provider, session_token) VALUES (?, ?, ?, ?, ?)",
 				userID, email, username, provider, sessionToken)
@@ -51,12 +48,11 @@ func AuthenticateOrRegisterOAuthUser(email, username, provider string, moderator
 		return "", err
 	}
 
-	// Если пользователь уже существует, обновляем токен сессии
-	sessionUUID, err := uuid.NewV4() // Создаем новый токен сессии
+	sessionUUID, err := uuid.NewV4()
 	if err != nil {
 		return "", err
 	}
-	sessionToken := sessionUUID.String() // Преобразуем UUID в строку
+	sessionToken := sessionUUID.String()
 
 	_, err = db.Exec("UPDATE users SET session_token = ? WHERE id = ?", sessionToken, userID)
 	if err != nil {
@@ -106,12 +102,10 @@ func RegisterUser(email, username, password string, isModeratorRequest bool) (st
 	}
 	sessionToken := sessionUUID.String()
 
-	// Устанавливаем провайдера (например, "email" для обычной регистрации)
 	provider := "email"
 
 	role := "user"
 	if isModeratorRequest {
-		log.Printf("Creating moderation request for userID: %s", userID)
 		err = CreateModerationRequest(userID, "moderator_request", "User requested moderator status", "")
 		if err != nil {
 			log.Printf("Error creating moderation request: %v", err)

@@ -17,7 +17,6 @@ func AdminPageHandler() http.HandlerFunc {
 			return
 		}
 
-		// Получаем запросы на модерацию
 		deleteRequests, err := models.GetAllModerationRequests()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -32,7 +31,6 @@ func AdminPageHandler() http.HandlerFunc {
 			return
 		}
 
-		// Получаем всех модераторов
 		moderators, err := models.GetAllModerators()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -40,7 +38,6 @@ func AdminPageHandler() http.HandlerFunc {
 			return
 		}
 
-		// Получаем данные о постах для каждого запроса на удаление
 		for i, request := range deleteRequests {
 			if request.PostID.Valid {
 				post, err := models.GetPostByID(request.PostID.String)
@@ -68,11 +65,10 @@ func AdminPageHandler() http.HandlerFunc {
 			return
 		}
 		section := r.URL.Query().Get("section")
-		// Передаем данные в шаблон
 		err = tmpl.Execute(w, struct {
 			DeleteRequests    []models.ModerationRequest
 			ModeratorRequests []models.ModerationRequest
-			Moderators        []models.User // Добавляем список модераторов
+			Moderators        []models.User
 			Section           string
 		}{
 			DeleteRequests:    deleteRequests,
@@ -90,26 +86,23 @@ func AdminPageHandler() http.HandlerFunc {
 func HandleModerationRequest() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID := getUserIDFromSession(r)
-		if !isAdmin(userID) { // Проверяем, админ ли пользователь
+		if !isAdmin(userID) {
 			http.Error(w, "Forbidden", http.StatusForbidden)
 			return
 		}
 
-		// Получаем ID запроса из формы
 		requestID, err := strconv.Atoi(r.FormValue("request_id"))
 		if err != nil {
 			http.Error(w, "Invalid request ID", http.StatusBadRequest)
 			return
 		}
 
-		// Получаем действие (approve или reject)
 		action := r.FormValue("action")
 		if action != "approve" && action != "reject" {
 			http.Error(w, "Invalid action", http.StatusBadRequest)
 			return
 		}
 
-		// Получаем данные о запросе
 		request, err := models.GetModerationRequestByID(requestID)
 		if err != nil {
 			http.Error(w, "Failed to retrieve request", http.StatusInternalServerError)
@@ -120,22 +113,18 @@ func HandleModerationRequest() http.HandlerFunc {
 			return
 		}
 
-		// Если запрос на удаление поста и действие - approve, удаляем пост
 		if action == "approve" && request.Type == "delete_post" {
-			// Проверяем, существует ли значение PostID и оно валидно
 			if !request.PostID.Valid {
 				http.Error(w, "Invalid post ID", http.StatusBadRequest)
 				return
 			}
 
-			// Удаляем пост
-			err := models.DeletePostByAdmin(request.PostID.String, "Deleted by admin") // Используем String() для извлечения значения
+			err := models.DeletePostByAdmin(request.PostID.String, "Deleted by admin")
 			if err != nil {
 				http.Error(w, "Failed to delete post", http.StatusInternalServerError)
 				return
 			}
 
-			// Отправляем уведомление пользователю
 			err = models.CreateNotification(request.UserID, userID, "approve_del", request.PostID.String, "post")
 			if err != nil {
 				http.Error(w, "Failed to create notification", http.StatusInternalServerError)
@@ -144,7 +133,6 @@ func HandleModerationRequest() http.HandlerFunc {
 		}
 
 		if action == "reject" && request.Type == "delete_post" {
-			// Отправляем уведомление пользователю о том, что запрос был отклонен
 			err := models.CreateNotification(request.UserID, userID, "reject_del", request.PostID.String, "post")
 			if err != nil {
 				http.Error(w, "Failed to create notification", http.StatusInternalServerError)
@@ -152,7 +140,6 @@ func HandleModerationRequest() http.HandlerFunc {
 			}
 		}
 
-		// Обновляем статус запроса
 		err = models.UpdateModerationRequestStatus(requestID, action)
 		if err != nil {
 			http.Error(w, "Failed to update request", http.StatusInternalServerError)
@@ -181,19 +168,16 @@ func IsModerator(userID string) bool {
 }
 
 func getUserIDFromSession(r *http.Request) string {
-	// Извлекаем cookie сессии
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
-		return "" // Если cookie нет, пользователь не авторизован
+		return ""
 	}
 
-	// Получаем токен из cookie
 	sessionToken := cookie.Value
 
-	// Получаем ID пользователя по токену через модель
 	userID, _, err := models.GetIDBySessionToken(sessionToken)
 	if err != nil {
-		return "" // Ошибка при извлечении ID
+		return ""
 	}
 
 	return userID
@@ -215,7 +199,6 @@ func RequestDeletionHandler() http.HandlerFunc {
 			return
 		}
 
-		// Сохраняем запрос на модерацию
 		err := models.CreateModerationRequest(userID, "delete_post", reason, postID)
 		if err != nil {
 			http.Error(w, "Failed to create moderation request", http.StatusInternalServerError)
@@ -229,7 +212,7 @@ func RequestDeletionHandler() http.HandlerFunc {
 
 func AdminApproveModeratorHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.FormValue("user_id")
-	action := r.FormValue("action") // "approve" или "reject"
+	action := r.FormValue("action")
 	requestID := r.FormValue("request_id")
 	requestIDInt, _ := strconv.Atoi(requestID)
 
@@ -238,15 +221,14 @@ func AdminApproveModeratorHandler(w http.ResponseWriter, r *http.Request) {
 	var status string
 	if action == "approve" {
 		newRole = "moderator"
-		notificationType = "approve_mod" // Уведомление о принятии в модераторы
+		notificationType = "approve_mod"
 		status = "approved"
 	} else {
 		newRole = "user"
-		notificationType = "reject_mod" // Уведомление об отклонении
+		notificationType = "reject_mod"
 		status = "rejected"
 	}
 
-	// Обновляем роль пользователя
 	if err := models.UpdateUserRole(userID, newRole); err != nil {
 		log.Printf("Error updating user role: %v", err)
 		ErrorHandler(w, r, http.StatusInternalServerError, "Failed to process request")
@@ -259,7 +241,6 @@ func AdminApproveModeratorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Отправляем уведомление о статусе модератора
 	err := models.CreateNotification(userID, userID, notificationType, "", "role")
 	if err != nil {
 		log.Printf("Error creating notification: %v", err)
@@ -267,27 +248,23 @@ func AdminApproveModeratorHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Перенаправляем на страницу админ-панели
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }
 
 func DemoteModeratorHandler(w http.ResponseWriter, r *http.Request) {
 	userID := r.FormValue("user_id")
 
-	// Проверяем, есть ли права администратора
 	adminID := getUserIDFromSession(r)
 	if !isAdmin(adminID) {
 		http.Error(w, "Forbidden", http.StatusForbidden)
 		return
 	}
 
-	// Меняем роль на "user"
 	if err := models.UpdateUserRole(userID, "user"); err != nil {
 		log.Printf("Error demoting moderator: %v", err)
 		http.Error(w, "Failed to demote moderator", http.StatusInternalServerError)
 		return
 	}
 
-	// Перенаправляем обратно на страницу админа
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
 }
