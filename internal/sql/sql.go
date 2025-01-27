@@ -2,8 +2,8 @@ package sql
 
 import (
 	"database/sql"
-	"io/ioutil"
 	"log"
+	"os"
 	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -56,7 +56,6 @@ func CreateTables(db *sql.DB) error {
 		return err
 	}
 
-	log.Println("Все таблицы успешно созданы.")
 	return nil
 }
 
@@ -72,12 +71,11 @@ func SeedCategories(db *sql.DB) error {
 		return err
 	}
 
-	log.Println("Категории успешно добавлены.")
 	return nil
 }
 
 func LoadSQLFile(filePath string) (string, error) {
-	content, err := ioutil.ReadFile(filepath.Clean(filePath))
+	content, err := os.ReadFile(filepath.Clean(filePath))
 	if err != nil {
 		return "", err
 	}
