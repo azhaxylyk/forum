@@ -75,7 +75,7 @@
                         <span class="tag">{{.}}</span>
                         {{end}}
                     </div>
-                    {{if $.LoggedIn}}
+                    {{if .LoggedIn}}
                         <p>
                             <form action="/like" method="post" style="display: inline;">
                                 <input type="hidden" name="post_id" value="{{.Post.ID}}">
@@ -87,12 +87,15 @@
                             </form> {{.Post.Dislikes}}
                         </p>
                         <div class="edit-delete-buttons">
-                            <button onclick="openEditModal('{{.Post.ID}}', '{{.Post.Content}}')" style="background-color: #FFA500; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Edit</button>
-                            <form action="/delete_post" method="post">
+                            <button onclick="openEditModal('{{.Post.ID}}', '{{js .Post.Content}}')" style="background-color: #FFA500; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Edit</button>
+                            <form action="/delete_post" method="post" style="display: inline;">
                                 <input type="hidden" name="post_id" value="{{.Post.ID}}">
-                                <button type="submit" style="background-color: #FF4500; color: white;">Delete</button>
-                            </form>                            
+                                <button type="submit" style="background-color: #FF4500; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+                            </form>
                         </div>
+                        {{if .IsModerator}}
+                            <button onclick="openRequestDeletionModal('{{.Post.ID}}')" style="background-color: #FF4500; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Request Deletion</button>
+                        {{end}}
                     {{end}}
                 </div>
 
@@ -101,7 +104,7 @@
                 <div class="comment-section">
                     <p>{{.Content}}</p>
                     <p>Comment by: <strong>{{.Author}}</strong></p>
-                    {{if $.LoggedIn}}
+                    {{if .LoggedIn}}
                         <form action="/like_comment" method="post" style="display: inline;">
                             <input type="hidden" name="comment_id" value="{{.ID}}">
                             <input type="hidden" name="post_id" value="{{$.Post.ID}}">
@@ -147,9 +150,21 @@
             <h2>Edit Post</h2>
             <form method="post" action="/edit_post">
                 <input type="hidden" name="post_id" id="edit-post-id">
-                <label for="edit-modal-content" style="font-weight: bold; margin-bottom: 10px; display: block;">Post Content:</label>
-                <textarea id="edit-modal-content" name="content" rows="6" style="width: 100%; resize: none; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" required></textarea>
-                <button type="submit" style="margin-top: 15px; padding: 10px 20px; background-color: #6200ea; color: white; border: none; border-radius: 8px; cursor: pointer;">Save Changes</button>
+                <textarea id="edit-modal-content" name="content" rows="6" style="width: 100%;" required></textarea>
+                <button type="submit" style="margin-top: 15px;">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for requesting deletion -->
+    <div id="requestDeletionModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeRequestDeletionModal()">&times;</span>
+            <h2>Request Post Deletion</h2>
+            <form method="post" action="/request_deletion">
+                <input type="hidden" name="post_id" id="request-deletion-post-id">
+                <textarea id="deletion-reason" name="reason" rows="4" style="width: 100%;" required></textarea>
+                <button type="submit" style="margin-top: 15px;">Submit Request</button>
             </form>
         </div>
     </div>
@@ -165,10 +180,21 @@
             document.getElementById("editPostModal").style.display = "none";
         }
 
+        function openRequestDeletionModal(postId) {
+            document.getElementById("requestDeletionModal").style.display = "block";
+            document.getElementById("request-deletion-post-id").value = postId;
+        }
+
+        function closeRequestDeletionModal() {
+            document.getElementById("requestDeletionModal").style.display = "none";
+        }
+
         window.onclick = function(event) {
-            const editPostModal = document.getElementById("editPostModal");
-            if (event.target === editPostModal) {
+            if (event.target === document.getElementById("editPostModal")) {
                 closeEditModal();
+            }
+            if (event.target === document.getElementById("requestDeletionModal")) {
+                closeRequestDeletionModal();
             }
         };
     </script>

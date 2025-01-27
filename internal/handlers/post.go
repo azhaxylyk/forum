@@ -171,7 +171,9 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var loggedIn bool
+	var isModerator bool
 	var username string
+
 	cookie, err := r.Cookie("session_token")
 	if err != nil || cookie == nil || cookie.Value == "" {
 		loggedIn = false
@@ -181,6 +183,7 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 			loggedIn = false
 		} else {
 			loggedIn = true
+			isModerator = IsModerator(userID)
 		}
 	}
 
@@ -189,15 +192,17 @@ func PostPageHandler(w http.ResponseWriter, r *http.Request) {
 		Comments     []models.Comment
 		LoggedIn     bool
 		Username     string
+		IsModerator  bool // Добавьте это поле
 		Notification string
 	}{
 		Post:         post,
 		Comments:     comments,
 		LoggedIn:     loggedIn,
 		Username:     username,
+		IsModerator:  isModerator, // По умолчанию false, если пользователь не модератор
 		Notification: notification,
 	}
-
+	fmt.Println(isModerator)
 	tmpl.Execute(w, data)
 }
 

@@ -18,12 +18,16 @@ func main() {
 	// Установка базы данных для моделей
 	models.SetDB(db)
 
+	http.HandleFunc("/admin", handlers.AdminPageHandler())
+	http.HandleFunc("/admin/handle_request", handlers.HandleModerationRequest())
+	http.HandleFunc("/admin/approve_moderator", handlers.AdminApproveModeratorHandler)
+	http.HandleFunc("/request_deletion", handlers.RequestDeletionHandler())
+	http.HandleFunc("/admin/demote_moderator", handlers.DemoteModeratorHandler)
+
 	http.HandleFunc("/auth/google", handlers.GoogleAuthHandler)
 	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
 	http.HandleFunc("/auth/github", handlers.GitHubAuthHandler)
 	http.HandleFunc("/auth/github/callback", handlers.GitHubCallbackHandler)
-
-	// Регистрация маршрутов
 	http.HandleFunc("/", handlers.MainPageHandler)
 	http.HandleFunc("/register", handlers.RegisterHandler)
 	http.HandleFunc("/login", handlers.LoginHandler)

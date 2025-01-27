@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"forum/internal/models"
 	"html/template"
 	"log"
@@ -38,102 +39,151 @@ var githubOAuthConfig = &oauth2.Config{
 }
 
 func GitHubAuthHandler(w http.ResponseWriter, r *http.Request) {
+	moderatorRequest := r.FormValue("moderator_request") == "on"
+
+	// Сохраняем moderatorRequest в cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "moderator_request",
+		Value:    fmt.Sprintf("%v", moderatorRequest),
+		Expires:  time.Now().Add(10 * time.Minute),
+		HttpOnly: true,
+		Path:     "/",
+	})
+
 	url := githubOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func GitHubCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
+	cookie, err := r.Cookie("moderator_request")
+	if err != nil {
+		log.Println("GitHubCallbackHandler: Error reading moderator_request cookie:", err)
+	}
+
+	moderatorRequest := cookie != nil && cookie.Value == "true"
+	log.Println("GitHubCallbackHandler: Moderator request =", moderatorRequest)
+
+	log.Println("GitHubCallbackHandler: Received code =", code)
+
 	token, err := githubOAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		log.Println("GitHub OAuth2 exchange failed:", err)
+		log.Println("GitHubCallbackHandler: GitHub OAuth2 exchange failed:", err)
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
+	log.Println("GitHubCallbackHandler: Token received successfully")
 
 	client := githubOAuthConfig.Client(context.Background(), token)
 	userInfo, err := getGitHubUserInfo(client)
 	if err != nil {
-		log.Println("Failed to get GitHub user info:", err)
+		log.Println("GitHubCallbackHandler: Failed to get GitHub user info:", err)
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
+	log.Printf("GitHubCallbackHandler: User info retrieved: %+v\n", userInfo)
 
-	// Проверка или создание пользователя в базе данных
-	sessionToken, err := models.AuthenticateOrRegisterOAuthUser(userInfo.Email, userInfo.Name, "github")
+	sessionToken, err := models.AuthenticateOrRegisterOAuthUser(userInfo.Email, userInfo.Name, "github", moderatorRequest)
 	if err != nil {
-		log.Println("Failed to authenticate/register user:", err)
+		log.Println("GitHubCallbackHandler: Failed to authenticate/register user:", err)
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
+	log.Println("GitHubCallbackHandler: User authenticated/registered successfully, session token =", sessionToken)
 
-	// Установка куки с токеном сессии
-	cookie := http.Cookie{
+	cookie = &http.Cookie{
 		Name:    "session_token",
 		Value:   sessionToken,
 		Expires: time.Now().Add(24 * time.Hour),
 		Path:    "/",
 	}
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, cookie)
+	log.Println("GitHubCallbackHandler: Session cookie set")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func GoogleAuthHandler(w http.ResponseWriter, r *http.Request) {
+	moderatorRequest := r.FormValue("moderator_request") == "on"
+
+	// Сохраняем moderatorRequest в cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "moderator_request",
+		Value:    fmt.Sprintf("%v", moderatorRequest),
+		Expires:  time.Now().Add(10 * time.Minute), // Срок жизни cookie
+		HttpOnly: true,
+		Path:     "/",
+	})
+
 	url := googleOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
 func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("GoogleCallbackHandler: Callback triggered")
 	code := r.URL.Query().Get("code")
+	cookie, err := r.Cookie("moderator_request")
+	if err != nil {
+		log.Println("GoogleCallbackHandler: Error reading moderator_request cookie:", err)
+	}
+
+	moderatorRequest := cookie != nil && cookie.Value == "true"
+	log.Println("GoogleCallbackHandler: Moderator request =", moderatorRequest)
+
 	token, err := googleOAuthConfig.Exchange(context.Background(), code)
 	if err != nil {
-		log.Println("Google OAuth2 exchange failed:", err)
+		log.Println("GoogleCallbackHandler: Google OAuth2 exchange failed:", err)
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
+	log.Println("GoogleCallbackHandler: Token received successfully")
 
 	client := googleOAuthConfig.Client(context.Background(), token)
 	userInfo, err := getGoogleUserInfo(client)
 	if err != nil {
-		log.Println("Failed to get Google user info:", err)
+		log.Println("GoogleCallbackHandler: Failed to get Google user info:", err)
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
+	log.Printf("GoogleCallbackHandler: User info retrieved: %+v\n", userInfo)
 
-	// Проверка или создание пользователя в базе данных
-	sessionToken, err := models.AuthenticateOrRegisterOAuthUser(userInfo.Email, userInfo.Name, "google")
+	sessionToken, err := models.AuthenticateOrRegisterOAuthUser(userInfo.Email, userInfo.Name, "google", moderatorRequest)
 	if err != nil {
-		log.Println("Failed to authenticate/register user:", err)
+		log.Println("GoogleCallbackHandler: Failed to authenticate/register user:", err)
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}
+	log.Println("GoogleCallbackHandler: User authenticated/registered successfully, session token =", sessionToken)
 
-	// Установка куки с токеном сессии
-	cookie := http.Cookie{
+	cookie = &http.Cookie{
 		Name:     "session_token",
 		Value:    sessionToken,
 		Expires:  time.Now().Add(24 * time.Hour),
-		Path:     "/",                  // Доступ к куки на всех маршрутах
-		HttpOnly: true,                 // Защита от доступа через JavaScript
-		Secure:   false,                // Для локального тестирования
-		SameSite: http.SameSiteLaxMode, // Уменьшение риска CSRF
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
 	}
-
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, cookie)
+	log.Println("GoogleCallbackHandler: Session cookie set")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func getGoogleUserInfo(client *http.Client) (*models.OAuthUserInfo, error) {
+	log.Println("getGoogleUserInfo: Retrieving user info from Google API")
 	resp, err := client.Get("https://www.googleapis.com/oauth2/v2/userinfo")
 	if err != nil {
+		log.Println("getGoogleUserInfo: Failed to call Google API:", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	var userInfo models.OAuthUserInfo
 	err = json.NewDecoder(resp.Body).Decode(&userInfo)
+	if err != nil {
+		log.Println("getGoogleUserInfo: Failed to decode user info:", err)
+	}
 	return &userInfo, err
 }
 
@@ -142,7 +192,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		email := sanitizeInput(r.FormValue("email"))
 		username := sanitizeInput(r.FormValue("username"))
 		password := r.FormValue("password")
-
+		moderatorRequest := r.FormValue("moderator_request") == "on" // Проверка, установлен ли флажок
+		log.Println("Form parameters:", r.Form)
 		if email == "" || username == "" || password == "" {
 			ErrorHandler(w, r, http.StatusBadRequest, "All fields are required")
 			log.Println("Error: Missing required fields")
@@ -181,8 +232,8 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Регистрация пользователя
-		sessionToken, err := models.RegisterUser(email, username, password)
+		// Регистрация пользователя с указанием, подал ли он запрос на становление модератором
+		sessionToken, err := models.RegisterUser(email, username, password, moderatorRequest)
 		if err != nil {
 			log.Printf("Error during user registration: %v", err)
 			ErrorHandler(w, r, http.StatusInternalServerError, http.StatusText(http.StatusInternalServerError))

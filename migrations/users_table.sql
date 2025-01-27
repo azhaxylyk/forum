@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS users (
 	password TEXT,
     session_token VARCHAR(255),
     provider VARCHAR(50) NOT NULL, -- Для Google/GitHub
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    role VARCHAR(20) NOT NULL DEFAULT 'user', -- 'user', 'moderator', 'admin'
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -1,0 +1,118 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa;
+    color: #343a40;
+    display: flex;
+    height: 100vh;
+}
+
+.main-layout {
+    display: flex;
+    width: 100%;
+}
+
+.sidebar {
+    width: 20%;
+    padding: 20px;
+    background-color: #343a40;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar h1 {
+    color: #007bff;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.sidebar ul {
+    padding: 0;
+    list-style: none;
+}
+
+.sidebar li {
+    margin-bottom: 15px;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: white;
+    display: block;
+    padding: 10px;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.sidebar a:hover {
+    background-color: #0056b3;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+h2 {
+    color: #007bff;
+    text-align: center;
+}
+
+.request-card {
+    background-color: #f1f1f1;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.request-card h3, .request-card h4 {
+    color: #343a40;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #007bff;
+    color: white;
+}
+
+table tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+table tr:hover {
+    background-color: #e9ecef;
+}

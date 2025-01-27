@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/static/admin.css">
+</head>
+<body>
+    <div class="main-layout">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <h1>Admin Panel</h1>
+            <ul>
+                <li><a href="/admin?section=delete_requests">Requests to Delete Posts</a></li>
+                <li><a href="/admin?section=moderator_requests">Requests to Become Moderator</a></li>
+                <li><a href="/admin?section=current_moderators">Current Moderators</a></li>
+            </ul>
+        </nav>
+
+        <!-- Content -->
+        <div class="content">
+            {{if or (eq .Section "") (eq .Section nil) (not .Section)}}
+            <!-- Requests to Delete Posts по умолчанию -->
+                <section class="requests-section">
+                    <h2>Requests to Delete Posts</h2>
+                    {{range .DeleteRequests}}
+                    {{if and (eq .Type "delete_post") (eq .Status "pending")}}
+                    <div class="request-card">
+                        <div class="post-preview">
+                            <h3>Post Preview</h3>
+                            <p>{{.PostContent}}</p> <!-- Должно быть получено из базы -->
+                        </div>
+                        <div class="request-details">
+                            <h4>Reason for Deletion</h4>
+                            <p>{{.Reason}}</p>
+                            <form method="post" action="/admin/handle_request">
+                                <input type="hidden" name="request_id" value="{{.ID}}">
+                                <button type="submit" name="action" value="approve">Approve</button>
+                                <button type="submit" name="action" value="reject">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                    {{end}}
+                {{end}}
+                </section>
+            {{end}}
+            {{if eq .Section "delete_requests"}}
+                <section class="requests-section">
+                    <h2>Requests to Delete Posts</h2>
+                    {{range .DeleteRequests}}
+                    {{if and (eq .Type "delete_post") (eq .Status "pending")}}
+                    <div class="request-card">
+                        <div class="post-preview">
+                            <h3>Post Preview</h3>
+                            <p>{{.PostContent}}</p>
+                        </div>
+                        <div class="request-details">
+                            <h4>Reason for Deletion</h4>
+                            <p>{{.Reason}}</p>
+                            <form method="post" action="/admin/handle_request">
+                                <input type="hidden" name="request_id" value="{{.ID}}">
+                                <button type="submit" name="action" value="approve">Approve</button>
+                                <button type="submit" name="action" value="reject">Reject</button>
+                            </form>
+                        </div>
+                    </div>
+                    {{end}}
+                    {{end}}
+                </section>
+
+            {{else if eq .Section "moderator_requests"}}
+                <section class="moderator-requests-section">
+                    <h2>Requests to Become Moderator</h2>
+                    <table class="moderator-requests">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .ModeratorRequests}}
+                            {{if eq .Status "pending"}}
+                            <tr>
+                                <td>{{.Username}}</td>
+                                <td>
+                                    <form method="post" action="/admin/approve_moderator">
+                                        <input type="hidden" name="user_id" value="{{.UserID}}">
+                                        <input type="hidden" name="request_id" value="{{.ID}}">
+                                        <button type="submit" name="action" value="approve">Approve</button>
+                                        <button type="submit" name="action" value="reject">Reject</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{end}}
+                            {{end}}
+                        </tbody>
+                    </table>
+                </section>
+
+            {{else if eq .Section "current_moderators"}}
+                <section class="moderators-section">
+                    <h2>Current Moderators</h2>
+                    <table class="moderators">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{range .Moderators}}
+                            <tr>
+                                <td>{{.Username}}</td>
+                                <td>
+                                    <form method="post" action="/admin/demote_moderator">
+                                        <input type="hidden" name="user_id" value="{{.ID}}">
+                                        <button type="submit">Demote</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {{end}}
+                        </tbody>
+                    </table>
+                </section>
+            {{end}}
+        </div>
+    </div>
+</body>
+</html>

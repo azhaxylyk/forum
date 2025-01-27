@@ -42,6 +42,7 @@ func GetNotificationsForUser(userID string) ([]Notification, error) {
 		ORDER BY created_at DESC
 	`, userID)
 	if err != nil {
+		fmt.Printf("Error querying notifications for user %s: %v\n", userID, err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -64,6 +65,7 @@ func GetNotificationsForUser(userID string) ([]Notification, error) {
 		}
 		notification.CreatedAt = createdAt
 		notification.CreatedAtFormatted = createdAt.Format("02.01.2006 15:04")
+		fmt.Printf("Fetched notification: %+v\n", notification)
 		notifications = append(notifications, notification)
 	}
 	return notifications, nil
@@ -121,6 +123,18 @@ func (n *Notification) GetMessage() (string, error) {
 		} else if n.TargetType == "comment" {
 			return fmt.Sprintf("%s disliked your comment.", username), nil
 		}
+	case "approve_del":
+		// Сообщение о том, что пост был удален администратором
+		return "Your request has been approved", nil
+	case "approve_mod":
+		// Сообщение о том, что пользователь был утвержден как модератор
+		return "Admin has approved you as a moderator.", nil
+	case "reject_mod":
+		// Сообщение о том, что пользователь был отклонен как модератор
+		return "Admin has rejected your application to be a moderator.", nil
+	case "reject_del":
+		// Сообщение о том, что запрос на удаление поста был отклонен
+		return "Your request to delete the post has been rejected.", nil
 	}
 
 	return "You have a new notification.", nil

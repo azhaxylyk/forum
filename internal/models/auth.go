@@ -14,7 +14,7 @@ type OAuthUserInfo struct {
 	Name  string `json:"name"`
 }
 
-func AuthenticateOrRegisterOAuthUser(email, username, provider string) (string, error) {
+func AuthenticateOrRegisterOAuthUser(email, username, provider string, moderatorRequest bool) (string, error) {
 	var userID string
 
 	// Проверяем, существует ли пользователь с таким email
@@ -27,7 +27,14 @@ func AuthenticateOrRegisterOAuthUser(email, username, provider string) (string, 
 				return "", err
 			}
 			userID = newUUID.String() // Преобразуем UUID в строку
-
+			if moderatorRequest {
+				log.Printf("Creating moderation request for userID: %s", userID)
+				err = CreateModerationRequest(userID, "moderator_request", "User requested moderator status", "")
+				if err != nil {
+					log.Printf("Error creating moderation request: %v", err)
+					return "", err
+				}
+			}
 			sessionUUID, err := uuid.NewV4() // Создаем токен сессии
 			if err != nil {
 				return "", err
@@ -77,7 +84,7 @@ func CheckUsernameExists(username string) (bool, error) {
 	return exists, err
 }
 
-func RegisterUser(email, username, password string) (string, error) {
+func RegisterUser(email, username, password string, isModeratorRequest bool) (string, error) {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
@@ -102,8 +109,19 @@ func RegisterUser(email, username, password string) (string, error) {
 	// Устанавливаем провайдера (например, "email" для обычной регистрации)
 	provider := "email"
 
+	role := "user"
+	if isModeratorRequest {
+		log.Printf("Creating moderation request for userID: %s", userID)
+		err = CreateModerationRequest(userID, "moderator_request", "User requested moderator status", "")
+		if err != nil {
+			log.Printf("Error creating moderation request: %v", err)
+			return "", err
+		}
+
+	}
+
 	_, err = db.Exec("INSERT INTO users (id, email, username, password, session_token, role, provider) VALUES (?, ?, ?, ?, ?, ?, ?)",
-		userID, email, username, hashedPassword, sessionToken, "user", provider)
+		userID, email, username, hashedPassword, sessionToken, role, provider)
 	if err != nil {
 		log.Printf("Error inserting user into database: %v", err)
 		return "", err
