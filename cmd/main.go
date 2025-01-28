@@ -2,6 +2,7 @@ package main
 
 import (
 	"forum/internal/models"
+	"forum/internal/ratelimiter"
 	"forum/internal/sql"
 	"log"
 	"net/http"
@@ -13,13 +14,12 @@ func main() {
 		log.Fatal(err, "server shutdown")
 	}
 	models.SetDB(db)
-	SetupRoutes()
 
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: nil,
-	}
+	mux := http.NewServeMux()
+	SetupRoutes(mux)
 
-	log.Println("Server started on http://localhost:8080")
-	log.Fatal(server.ListenAndServe())
+	limitedMux := ratelimiter.RateLimitMiddleware(mux)
+
+	// Start the server
+	StartServer(limitedMux)
 }

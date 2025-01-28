@@ -5,55 +5,55 @@ import (
 	"net/http"
 )
 
-func SetupRoutes() {
-	setupAdminRoutes()
-	setupAuthRoutes()
-	setupPostRoutes()
-	setupNotificationRoutes()
-	setupStaticRoutes()
+func SetupRoutes(mux *http.ServeMux) {
+	setupAdminRoutes(mux)
+	setupAuthRoutes(mux)
+	setupPostRoutes(mux)
+	setupNotificationRoutes(mux)
+	setupStaticRoutes(mux)
 }
 
-func setupAdminRoutes() {
-	http.HandleFunc("/admin", handlers.AdminPageHandler())
-	http.HandleFunc("/admin/handle_request", handlers.HandleModerationRequest())
-	http.HandleFunc("/admin/approve_moderator", handlers.AdminApproveModeratorHandler)
-	http.HandleFunc("/admin/demote_moderator", handlers.DemoteModeratorHandler)
+func setupAdminRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/admin", handlers.AdminPageHandler())
+	mux.HandleFunc("/admin/handle_request", handlers.HandleModerationRequest())
+	mux.HandleFunc("/admin/approve_moderator", handlers.AdminApproveModeratorHandler)
+	mux.HandleFunc("/admin/demote_moderator", handlers.DemoteModeratorHandler)
 }
 
-func setupAuthRoutes() {
-	http.HandleFunc("/auth/google", handlers.GoogleAuthHandler)
-	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
-	http.HandleFunc("/auth/github", handlers.GitHubAuthHandler)
-	http.HandleFunc("/auth/github/callback", handlers.GitHubCallbackHandler)
-	http.HandleFunc("/register", handlers.RegisterHandler)
-	http.HandleFunc("/login", handlers.LoginHandler)
-	http.HandleFunc("/logout", handlers.LogoutHandler)
+func setupAuthRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/auth/google", handlers.GoogleAuthHandler)
+	mux.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
+	mux.HandleFunc("/auth/github", handlers.GitHubAuthHandler)
+	mux.HandleFunc("/auth/github/callback", handlers.GitHubCallbackHandler)
+	mux.HandleFunc("/register", handlers.RegisterHandler)
+	mux.HandleFunc("/login", handlers.LoginHandler)
+	mux.HandleFunc("/logout", handlers.LogoutHandler)
 }
 
-func setupPostRoutes() {
-	http.HandleFunc("/", handlers.MainPageHandler)
-	http.HandleFunc("/create_post", handlers.CreatePostHandler)
-	http.HandleFunc("/post", handlers.PostPageHandler)
-	http.HandleFunc("/delete_post", handlers.DeletePostHandler)
-	http.HandleFunc("/edit_post", handlers.EditPostHandler)
-	http.HandleFunc("/like", handlers.LikeHandler)
-	http.HandleFunc("/dislike", handlers.DislikeHandler)
-	http.HandleFunc("/create_comment", handlers.CreateCommentHandler)
-	http.HandleFunc("/like_comment", handlers.LikeCommentHandler)
-	http.HandleFunc("/dislike_comment", handlers.DislikeCommentHandler)
-	http.HandleFunc("/my_posts", handlers.MyPostsHandler)
-	http.HandleFunc("/liked_posts", handlers.LikedPostsHandler)
-	http.HandleFunc("/profile", handlers.ProfilePageHandler)
+func setupPostRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/", handlers.MainPageHandler)
+	mux.HandleFunc("/create_post", handlers.CreatePostHandler)
+	mux.HandleFunc("/post", handlers.PostPageHandler)
+	mux.HandleFunc("/delete_post", handlers.DeletePostHandler)
+	mux.HandleFunc("/edit_post", handlers.EditPostHandler)
+	mux.HandleFunc("/like", handlers.LikeHandler)
+	mux.HandleFunc("/dislike", handlers.DislikeHandler)
+	mux.HandleFunc("/create_comment", handlers.CreateCommentHandler)
+	mux.HandleFunc("/like_comment", handlers.LikeCommentHandler)
+	mux.HandleFunc("/dislike_comment", handlers.DislikeCommentHandler)
+	mux.HandleFunc("/my_posts", handlers.MyPostsHandler)
+	mux.HandleFunc("/liked_posts", handlers.LikedPostsHandler)
+	mux.HandleFunc("/profile", handlers.ProfilePageHandler)
 }
 
-func setupNotificationRoutes() {
-	http.HandleFunc("/notifications", handlers.GetNotificationsHandler)
-	http.HandleFunc("/notifications/mark-as-read", handlers.MarkNotificationAsReadHandler)
-	http.HandleFunc("/notifications/mark-all-as-read", handlers.MarkAllNotificationsAsReadHandler)
-	http.HandleFunc("/notifications/unread-count", handlers.GetUnreadCountHandler)
+func setupNotificationRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("/notifications", handlers.GetNotificationsHandler)
+	mux.HandleFunc("/notifications/mark-as-read", handlers.MarkNotificationAsReadHandler)
+	mux.HandleFunc("/notifications/mark-all-as-read", handlers.MarkAllNotificationsAsReadHandler)
+	mux.HandleFunc("/notifications/unread-count", handlers.GetUnreadCountHandler)
 }
 
-func setupStaticRoutes() {
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
-	http.Handle("/icons/", http.StripPrefix("/icons/", http.FileServer(http.Dir("./web/icons"))))
+func setupStaticRoutes(mux *http.ServeMux) {
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static"))))
+	mux.Handle("/icons/", http.StripPrefix("/icons/", http.FileServer(http.Dir("./web/icons"))))
 }
