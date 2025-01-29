@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -19,23 +20,28 @@ import (
 
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
-var googleOAuthConfig = &oauth2.Config{
-	ClientID:     "9254237354-63n6pgm41osqflqoq98boibdnkpsuggv.apps.googleusercontent.com",
-	ClientSecret: "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",
-	RedirectURL:  "http://localhost:8080/auth/google/callback",
-	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
-	Endpoint:     google.Endpoint,
-}
+var googleOAuthConfig *oauth2.Config
+var githubOAuthConfig *oauth2.Config
 
-var githubOAuthConfig = &oauth2.Config{
-	ClientID:     "Ov23liLxsRM71uKlB8vB",
-	ClientSecret: "d09213d471a0ceccfc39ad0409be7599ee8c9040",
-	RedirectURL:  "http://localhost:8080/auth/github/callback",
-	Scopes:       []string{"user:email"},
-	Endpoint: oauth2.Endpoint{
-		AuthURL:  "https://github.com/login/oauth/authorize",
-		TokenURL: "https://github.com/login/oauth/access_token",
-	},
+func InitOAuthConfigs() {
+	googleOAuthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
+		RedirectURL:  "https://localhost:8080/auth/google/callback",
+		Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+		Endpoint:     google.Endpoint,
+	}
+
+	githubOAuthConfig = &oauth2.Config{
+		ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+		ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
+		RedirectURL:  "https://localhost:8080/auth/github/callback",
+		Scopes:       []string{"user:email"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://github.com/login/oauth/authorize",
+			TokenURL: "https://github.com/login/oauth/access_token",
+		},
+	}
 }
 
 func GitHubAuthHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +56,7 @@ func GitHubAuthHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	url := githubOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	log.Printf("GitHub Auth URL: %s", url)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -105,8 +112,9 @@ func GoogleAuthHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Path:     "/",
 	})
-
+	log.Printf("GOOGLE_CLIENT_ID before OAuthConfig: %s", os.Getenv("GOOGLE_CLIENT_ID"))
 	url := googleOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
+	log.Printf("Google Auth URL: %s", url)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
