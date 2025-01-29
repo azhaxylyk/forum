@@ -1,24 +1,9 @@
-*.exe
-*.out
-*.o
-*.so
-
-/bin/
-/pkg/
-*.test
-
-*.log
-*.tmp
-*.swp
-*.swo
+certs/
+certs/*.key
+certs/*.crt
 
 .env
-config.yaml
-config.json
 
 go.sum
 
 .vscode/
-.idea/
-*.iml
-*.DS_Store
