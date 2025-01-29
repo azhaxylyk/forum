@@ -8,7 +8,6 @@ import (
 	"forum/internal/sql"
 	"log"
 	"net/http"
-	"os"
 )
 
 func main() {
@@ -19,8 +18,6 @@ func main() {
 	models.SetDB(db)
 	config.LoadEnv()
 	handlers.InitOAuthConfigs()
-	log.Printf("Google Client ID: %s", os.Getenv("GOOGLE_CLIENT_ID"))
-	log.Printf("GitHub Client ID: %s", os.Getenv("GITHUB_CLIENT_ID"))
 	mux := http.NewServeMux()
 	SetupRoutes(mux)
 

@@ -31,11 +31,9 @@ func LoadEnv() {
 		key := strings.TrimSpace(parts[0])
 		value := strings.TrimSpace(parts[1])
 		os.Setenv(key, value)
-		log.Printf("Loaded environment variable: %s", key)
 	}
 
 	if err := scanner.Err(); err != nil {
 		log.Println("Error reading .env file:", err)
 	}
-	log.Println("Environment variables loaded")
 }

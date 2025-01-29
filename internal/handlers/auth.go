@@ -56,7 +56,6 @@ func GitHubAuthHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	url := githubOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	log.Printf("GitHub Auth URL: %s", url)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 
@@ -112,9 +111,7 @@ func GoogleAuthHandler(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Path:     "/",
 	})
-	log.Printf("GOOGLE_CLIENT_ID before OAuthConfig: %s", os.Getenv("GOOGLE_CLIENT_ID"))
 	url := googleOAuthConfig.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	log.Printf("Google Auth URL: %s", url)
 	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }
 

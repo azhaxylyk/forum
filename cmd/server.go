@@ -9,11 +9,8 @@ import (
 )
 
 func StartServer(mux http.Handler) {
-	log.Printf("Environment variables: SSL_CERT_PATH=%s, SSL_KEY_PATH=%s", os.Getenv("SSL_CERT_PATH"), os.Getenv("SSL_KEY_PATH"))
 	certPath := os.Getenv("SSL_CERT_PATH")
 	keyPath := os.Getenv("SSL_KEY_PATH")
-	log.Printf("Using SSL certificate: %s", certPath)
-	log.Printf("Using SSL key: %v", keyPath)
 	if certPath == "" || keyPath == "" {
 		log.Fatal("Certificate paths not set in environment variables")
 	}
