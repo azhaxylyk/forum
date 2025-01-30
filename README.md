@@ -11,9 +11,21 @@ Navigate to the project directory:
 ```bash
 cd forum
 ```
+Before running the project, you need to set up environment variables.
+Create a .env file by copying the example file:
+```
+cp .env.example .env
+```
+Then, open .env and fill in the required values, such as authentication credentials:
+```
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+```
+“**Note:** Make sure to keep your `.env` file secure and do not share it publicly.”
 
-## Running the Project
-#### Initialize the Environment
+## Initialize the Environment
 Before running the project, you need to generate SSL certificates and set up environment variables.
 ```
 make init
@@ -22,13 +34,13 @@ This command will:
 - Create the certs/ directory if it does not exist.
 - Generate self-signed SSL certificates (certs/localhost.crt and certs/localhost.key).
 - Set environment variables SSL_CERT_PATH and SSL_KEY_PATH for secure communication.
-#### If you want the environment variables to persist across sessions, run:
+
+If you want the environment variables to persist across sessions, run:
 ```
 source ~/.bashrc
 ```
 
 ## Usage
-#### Run the Program
 You can start the program in one of the following ways:
 
 **1. Directly using Go:**
@@ -51,7 +63,6 @@ Run the Docker container:
 ```bash
 make run-img
 ```
-#### Stop the Server
 To stop the server or Docker container:
    ```bash
    make stop
