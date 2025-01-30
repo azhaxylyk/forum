@@ -7,7 +7,7 @@ import (
 
 func GetPostsByUser(userID string) ([]Post, error) {
 	rows, err := db.Query(`
-        SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
+        SELECT posts.id, posts.content, posts.image_path, posts.created_at, posts.likes, posts.dislikes, users.username
         FROM posts
         JOIN users ON posts.user_id = users.id
         WHERE posts.user_id = ?
@@ -23,7 +23,7 @@ func GetPostsByUser(userID string) ([]Post, error) {
 		var post Post
 		var createdAt time.Time
 
-		err = rows.Scan(&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
+		err = rows.Scan(&post.ID, &post.Content, &post.ImagePath, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +43,7 @@ func GetPostsByUser(userID string) ([]Post, error) {
 
 func GetLikedPostsByUser(userID string) ([]Post, error) {
 	rows, err := db.Query(`
-        SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
+        SELECT posts.id, posts.content, posts.image_path, posts.created_at, posts.likes, posts.dislikes, users.username
         FROM posts
         JOIN users ON posts.user_id = users.id
         JOIN post_likes ON posts.id = post_likes.post_id
@@ -60,7 +60,7 @@ func GetLikedPostsByUser(userID string) ([]Post, error) {
 		var post Post
 		var createdAt time.Time
 
-		err = rows.Scan(&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
+		err = rows.Scan(&post.ID, &post.Content, &post.ImagePath, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
 		if err != nil {
 			return nil, err
 		}
@@ -80,7 +80,7 @@ func GetLikedPostsByUser(userID string) ([]Post, error) {
 
 func GetDislikedPostsByUser(userID string) ([]Post, error) {
 	rows, err := db.Query(`
-        SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
+        SELECT posts.id, posts.content, posts.image_path, posts.created_at, posts.likes, posts.dislikes, users.username
         FROM posts
         JOIN users ON posts.user_id = users.id
         JOIN post_likes ON posts.id = post_likes.post_id
@@ -98,7 +98,7 @@ func GetDislikedPostsByUser(userID string) ([]Post, error) {
 		var post Post
 		var createdAt time.Time
 
-		err = rows.Scan(&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
+		err = rows.Scan(&post.ID, &post.Content, &post.ImagePath, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
 		if err != nil {
 			log.Printf("Error scanning row: %v", err)
 			return nil, err

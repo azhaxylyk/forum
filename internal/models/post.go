@@ -12,6 +12,7 @@ import (
 type Post struct {
 	ID                 string
 	Content            template.HTML
+	ImagePath          string // IMAGE
 	CreatedAt          time.Time
 	CreatedAtFormatted string
 	Likes              int
@@ -34,14 +35,14 @@ func SetDB(database *sql.DB) {
 	db = database
 }
 
-func CreatePost(userID, content string) (string, error) {
+func CreatePost(userID, content, imagePath string) (string, error) {
 	postID, err := uuid.NewV4()
 	if err != nil {
 		return "", err
 	}
 
-	_, err = db.Exec("INSERT INTO posts (id, user_id, content, created_at) VALUES (?, ?, ?, ?)",
-		postID.String(), userID, content, time.Now())
+	_, err = db.Exec("INSERT INTO posts (id, user_id, content, image_path, created_at) VALUES (?, ?, ?, ?, ?)",
+		postID.String(), userID, content, imagePath, time.Now())
 	return postID.String(), err
 }
 
@@ -143,7 +144,7 @@ func GetFilteredPosts(loggedIn bool, userID, categoryID string) ([]Post, error) 
 
 	if categoryID != "" {
 		rows, err = db.Query(`
-            SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
+            SELECT posts.id, posts.content, posts.image_path, posts.created_at, posts.likes, posts.dislikes, users.username
             FROM posts
             JOIN users ON posts.user_id = users.id
             JOIN post_categories ON posts.id = post_categories.post_id
@@ -152,7 +153,7 @@ func GetFilteredPosts(loggedIn bool, userID, categoryID string) ([]Post, error) 
         `, categoryID)
 	} else {
 		rows, err = db.Query(`
-            SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
+            SELECT posts.id, posts.content, posts.image_path, posts.created_at, posts.likes, posts.dislikes, users.username
             FROM posts
             JOIN users ON posts.user_id = users.id
             ORDER BY posts.created_at DESC
@@ -169,7 +170,8 @@ func GetFilteredPosts(loggedIn bool, userID, categoryID string) ([]Post, error) 
 		var post Post
 		var createdAt time.Time
 
-		err = rows.Scan(&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
+		// Добавлено сканирование image_path
+		err = rows.Scan(&post.ID, &post.Content, &post.ImagePath, &createdAt, &post.Likes, &post.Dislikes, &post.Author)
 		if err != nil {
 			return nil, err
 		}
@@ -213,12 +215,13 @@ func GetPostByID(postID string) (Post, error) {
 	var createdAt time.Time
 
 	err := db.QueryRow(`
-        SELECT posts.id, posts.content, posts.created_at, posts.likes, posts.dislikes, users.username
-        FROM posts
-        JOIN users ON posts.user_id = users.id
-        WHERE posts.id = ?`, postID).Scan(
-		&post.ID, &post.Content, &createdAt, &post.Likes, &post.Dislikes, &post.Author,
+    SELECT posts.id, posts.content, posts.image_path, posts.created_at, posts.likes, posts.dislikes, users.username
+    FROM posts
+    JOIN users ON posts.user_id = users.id
+    WHERE posts.id = ?`, postID).Scan(
+		&post.ID, &post.Content, &post.ImagePath, &createdAt, &post.Likes, &post.Dislikes, &post.Author,
 	)
+
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return post, err
@@ -287,7 +290,12 @@ func DeletePost(postID string) error {
 	return tx.Commit()
 }
 
-func UpdatePost(postID, content string) error {
-	_, err := db.Exec("UPDATE posts SET content = ? WHERE id = ?", content, postID)
-	return err
+func UpdatePost(postID, content, imagePath string) error {
+	if imagePath != "" {
+		_, err := db.Exec("UPDATE posts SET content = ?, image_path = ? WHERE id = ?", content, imagePath, postID)
+		return err
+	} else {
+		_, err := db.Exec("UPDATE posts SET content = ? WHERE id = ?", content, postID)
+		return err
+	}
 }

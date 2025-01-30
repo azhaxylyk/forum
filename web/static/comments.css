@@ -103,3 +103,4 @@ textarea, button {
     filter: brightness(0) invert(1); /* Сделать белым */
     transition: transform 0.3s ease; /* Добавить анимацию */
 }
+

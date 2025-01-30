@@ -60,6 +60,9 @@
                             {{range .LikedPosts}}
                                 <div class="post">
                                     <p>{{.Content}}</p>
+                                    {{if .ImagePath}}
+                                        <img src="{{.ImagePath}}" alt="Post Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+                                    {{end}}
                                     <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
                                     <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
                                 </div>
@@ -75,6 +78,9 @@
                             {{range .DislikedPosts}}
                                 <div class="post">
                                     <p>{{.Content}}</p>
+                                    {{if .ImagePath}}
+                                        <img src="{{.ImagePath}}" alt="Post Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+                                    {{end}}
                                     <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
                                     <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
                                 </div>
@@ -90,6 +96,9 @@
                             {{range .Posts}}
                                 <div class="post">
                                     <p>{{.Content}}</p>
+                                    {{if .ImagePath}}
+                                        <img src="{{.ImagePath}}" alt="Post Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+                                    {{end}}
                                     <p>On {{.CreatedAtFormatted}}</p>
                                     <p><a href="/post?id={{.ID}}" class="read-more">View Comments</a></p>
                                 </div>

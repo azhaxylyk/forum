@@ -275,3 +275,10 @@ button:hover {
     font-style: italic;
     color: #888;
 }
+
+.post img {
+    max-width: 100%;
+    height: auto;
+    margin-top: 10px;
+    border-radius: 5px;
+}

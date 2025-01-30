@@ -64,6 +64,9 @@
                     {{range .Posts}} 
                     <div class="post">
                         <p>{{.Content}}</p>
+                        {{if .ImagePath}}
+                            <img src="{{.ImagePath}}" alt="Post Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+                        {{end}}
                         <p>By <strong>{{.Author}}</strong> on {{.CreatedAtFormatted}}</p>
                         <div class="post-tags">
                             {{range .Categories}}
@@ -121,7 +124,7 @@
         <div class="modal-content">
             <span class="close-button" onclick="closeModal()">&times;</span>
             <h2>Create a New Post</h2>
-            <form method="post" action="/create_post">
+            <form method="post" action="/create_post" enctype="multipart/form-data">
                 <label style="font-weight: bold; margin-bottom: 10px; display: block;">Choose categories:</label>
                 <div style="margin-bottom: 15px;">
                     {{range .Categories}}
@@ -133,6 +136,8 @@
                 </div>
                 <label for="modal-content" style="font-weight: bold; margin-bottom: 10px; display: block;">Post Content:</label>
                 <textarea id="modal-content" name="content" rows="6" style="width: 100%; resize: none; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" placeholder="What's on your mind?" required></textarea>
+                <label for="image" style="font-weight: bold; margin-bottom: 10px; display: block;">Upload Image (optional):</label>
+                <input type="file" id="image" name="image" accept="image/jpeg, image/png, image/gif">
                 <button type="submit" style="margin-top: 15px; padding: 10px 20px; background-color: #6200ea; color: white; border: none; border-radius: 8px; cursor: pointer;">Create Post</button>
             </form>
         </div>

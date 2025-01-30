@@ -17,16 +17,18 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.4);
         }
+
         .modal-content {
-            background-color: #fff;
-            margin: 10% auto;
+            background-color: #1e1e1e;
+            margin: 15% auto;
             padding: 20px;
             border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
             border-radius: 10px;
-            width: 50%;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
         .close-button {
             color: #aaa;
@@ -69,6 +71,9 @@
                 <h2>Post:</h2>
                 <div class="post">
                     <p>{{.Post.Content}}</p>
+                    {{if .Post.ImagePath}}
+                        <img src="{{.Post.ImagePath}}" alt="Post Image" style="max-width: 100%; height: auto; margin-top: 10px;">
+                    {{end}}
                     <p>By <strong>{{.Post.Author}}</strong> on {{.Post.CreatedAtFormatted}}</p>
                     <div class="post-tags">
                         {{range .Post.Categories}}
@@ -148,9 +153,11 @@
         <div class="modal-content">
             <span class="close-button" onclick="closeEditModal()">&times;</span>
             <h2>Edit Post</h2>
-            <form method="post" action="/edit_post">
+            <form method="post" action="/edit_post" enctype="multipart/form-data">
                 <input type="hidden" name="post_id" id="edit-post-id">
-                <textarea id="edit-modal-content" name="content" rows="6" style="width: 100%;" required></textarea>
+                <textarea id="edit-modal-content" name="content" rows="6" style="width: 100%; resize: none; padding: 10px; border-radius: 5px; border: 1px solid #ccc;" required></textarea>
+                <label for="edit-image" style="font-weight: bold; margin-top: 15px; display: block;">Upload New Image (optional):</label>
+                <input type="file" id="edit-image" name="image" accept="image/jpeg, image/png, image/gif">
                 <button type="submit" style="margin-top: 15px;">Save Changes</button>
             </form>
         </div>
