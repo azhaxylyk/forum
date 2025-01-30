@@ -117,7 +117,7 @@ func MarkNotificationAsReadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/notifications", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func MarkAllNotificationsAsReadHandler(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +150,7 @@ func MarkAllNotificationsAsReadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/notifications", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func GetUnreadCountHandler(w http.ResponseWriter, r *http.Request) {
