@@ -20,8 +20,10 @@ import (
 
 var emailRegex = regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
-var googleOAuthConfig *oauth2.Config
-var githubOAuthConfig *oauth2.Config
+var (
+	googleOAuthConfig *oauth2.Config
+	githubOAuthConfig *oauth2.Config
+)
 
 func InitOAuthConfigs() {
 	googleOAuthConfig = &oauth2.Config{

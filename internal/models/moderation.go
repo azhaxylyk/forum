@@ -175,3 +175,12 @@ func GetAllModerators() ([]User, error) {
 	}
 	return moderators, nil
 }
+
+func AddCategory(name string) error {
+	_, err := db.Exec(`INSERT INTO categories (name) VALUES (?)`, name)
+	if err != nil {
+		log.Printf("Error inserting category: %v", err)
+		return err
+	}
+	return nil
+}

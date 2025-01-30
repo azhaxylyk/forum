@@ -311,7 +311,7 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if ownerID != userID {
+	if userID != ownerID && !isAdmin(userID) {
 		ErrorHandler(w, r, http.StatusForbidden, "You are not allowed to delete this post")
 		return
 	}

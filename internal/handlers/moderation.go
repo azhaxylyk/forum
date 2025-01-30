@@ -58,6 +58,14 @@ func AdminPageHandler() http.HandlerFunc {
 			}
 		}
 
+		var categories []models.Category
+		categories, err = models.GetAllCategories()
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Failed to load categories"))
+			return
+		}
+
 		tmpl, err := template.ParseFiles("web/templates/admin.html")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -70,11 +78,13 @@ func AdminPageHandler() http.HandlerFunc {
 			ModeratorRequests []models.ModerationRequest
 			Moderators        []models.User
 			Section           string
+			Categories        []models.Category
 		}{
 			DeleteRequests:    deleteRequests,
 			ModeratorRequests: moderatorRequests,
 			Moderators:        moderators,
 			Section:           section,
+			Categories:        categories,
 		})
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -267,4 +277,61 @@ func DemoteModeratorHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/admin", http.StatusSeeOther)
+}
+
+func RequestModeratorHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet && r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	cookie, err := r.Cookie("session_token")
+	if err != nil || cookie.Value == "" {
+		http.Error(w, "Unauthorized. Please log in.", http.StatusUnauthorized)
+		return
+	}
+
+	userID, _, err := models.GetIDBySessionToken(cookie.Value)
+	if err != nil {
+		http.Error(w, "Could not retrieve user data from session.", http.StatusUnauthorized)
+		return
+	}
+	err = models.CreateModerationRequest(userID, "moderator_request", "User requests moderator status", "")
+	if err != nil {
+		log.Printf("Error creating moderation request: %v", err)
+		http.Error(w, "Could not create moderation request.", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/profile", http.StatusSeeOther)
+}
+
+func AddCategoryHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID := getUserIDFromSession(r)
+		if !isAdmin(userID) {
+			http.Error(w, "Forbidden", http.StatusForbidden)
+			return
+		}
+
+		if r.Method != http.MethodPost {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		categoryName := r.FormValue("category_name")
+		if categoryName == "" {
+			http.Error(w, "Category name is required", http.StatusBadRequest)
+			return
+		}
+
+		err := models.AddCategory(categoryName)
+		if err != nil {
+			log.Printf("Error adding category: %v", err)
+			http.Error(w, "Failed to add category", http.StatusInternalServerError)
+			return
+		}
+
+		http.Redirect(w, r, "/admin?section=categories", http.StatusSeeOther)
+	}
 }

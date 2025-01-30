@@ -19,6 +19,8 @@ func setupAdminRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/admin/approve_moderator", handlers.AdminApproveModeratorHandler)
 	mux.HandleFunc("/admin/demote_moderator", handlers.DemoteModeratorHandler)
 	mux.HandleFunc("/request_deletion", handlers.RequestDeletionHandler())
+	mux.HandleFunc("/request-moderator", handlers.RequestModeratorHandler)
+	mux.HandleFunc("/admin/add_category", handlers.AddCategoryHandler())
 }
 
 func setupAuthRoutes(mux *http.ServeMux) {

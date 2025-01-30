@@ -31,6 +31,13 @@
                     <li><a href="/profile?section=likes">My Likes</a></li>
                     <li><a href="/profile?section=dislikes">My Dislikes</a></li>
                 </ul>
+
+                {{if eq .Role "user"}}
+                    <button onclick="window.location.href='/request-moderator'">
+                        Apply as a moderator
+                    </button>
+                {{end}}
+
             </aside>
 
             <!-- ОСНОВНОЙ КОНТЕНТ -->

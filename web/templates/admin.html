@@ -15,6 +15,7 @@
                 <li><a href="/admin?section=delete_requests">Requests to Delete Posts</a></li>
                 <li><a href="/admin?section=moderator_requests">Requests to Become Moderator</a></li>
                 <li><a href="/admin?section=current_moderators">Current Moderators</a></li>
+                <li><a href="/admin?section=categories">Manage Categories</a></li>
             </ul>
         </nav>
 
@@ -124,6 +125,25 @@
                         </tbody>
                     </table>
                 </section>
+
+            {{else if eq .Section "categories"}}
+                <section class="categories-section">
+                    <h2>Categories</h2>
+                    {{if .Categories}}
+                        <ul>
+                            {{range .Categories}}
+                                <li>{{.Name}}</li>
+                            {{end}}
+                        </ul>
+                    {{else}}
+                        <p>No categories yet.</p>
+                    {{end}}
+                    <h3>Add New Category</h3>
+                    <form method="post" action="/admin/add_category">
+                        <input type="text" name="category_name" placeholder="New category name" required>
+                        <button type="submit">Add Category</button>
+                    </form>
+                </section>    
             {{end}}
         </div>
     </div>

@@ -21,6 +21,12 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userRole, err := models.GetUserRole(userID)
+	if err != nil {
+		ErrorHandler(w, r, http.StatusInternalServerError, "Error retrieving user role")
+		return
+	}
+
 	section := r.URL.Query().Get("section")
 
 	var (
@@ -72,6 +78,7 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		LikedPosts    []models.Post
 		DislikedPosts []models.Post
 		Comments      []map[string]interface{}
+		Role          string
 	}{
 		LoggedIn:      true,
 		Username:      username,
@@ -80,6 +87,7 @@ func ProfilePageHandler(w http.ResponseWriter, r *http.Request) {
 		LikedPosts:    likedPosts,
 		DislikedPosts: dislikedPosts,
 		Comments:      comments,
+		Role:          userRole,
 	}
 
 	err = tmpl.Execute(w, data)
