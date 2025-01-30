@@ -2,6 +2,8 @@ certs/
 certs/*.key
 certs/*.crt
 
+web/static/uploads/
+
 forum.db
 
 .env
