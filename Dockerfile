@@ -18,7 +18,7 @@ WORKDIR /root/
 
 RUN apk add --no-cache sqlite
 
-
+COPY --from=builder /app/forum.db .
 COPY --from=builder /app/forum .
 COPY --from=builder /app/certs ./certs
 COPY --from=builder /app/migrations ./migrations
