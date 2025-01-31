@@ -4,13 +4,12 @@ import (
 	"crypto/tls"
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
 func StartServer(mux http.Handler) {
-	certPath := os.Getenv("SSL_CERT_PATH")
-	keyPath := os.Getenv("SSL_KEY_PATH")
+	certPath := "certs/localhost.crt"
+	keyPath := "certs/localhost.key"
 	if certPath == "" || keyPath == "" {
 		log.Fatal("Certificate paths not set in environment variables")
 	}

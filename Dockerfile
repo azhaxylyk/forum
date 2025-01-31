@@ -1,19 +1,30 @@
-# FROM golang:1.22 as build
-# WORKDIR /cmd 
-# COPY . .
-# RUN go build -o forum ./cmd/main.go
-# FROM alpine:3.16
-# WORKDIR /cmd
-# COPY --from=build /cmd /cmd
-# CMD ["./forum"]
+FROM golang:1.23-alpine AS builder
 
-FROM golang:alpine AS builder
-ENV CGO_ENABLED=1
+WORKDIR /app
+
 RUN apk add --no-cache gcc musl-dev
-WORKDIR /code
+
+COPY go.mod go.sum ./
+
+RUN go mod download
+
 COPY . .
-RUN go build -o forum ./cmd/main.go
+
+RUN CGO_ENABLED=1 GOOS=linux go build -o forum ./cmd
+
 FROM alpine:latest
-WORKDIR /code
-COPY --from=builder /code .
+
+WORKDIR /root/
+
+RUN apk add --no-cache sqlite
+
+
+COPY --from=builder /app/forum .
+COPY --from=builder /app/certs ./certs
+COPY --from=builder /app/migrations ./migrations
+COPY --from=builder /app/web ./web
+COPY --from=builder /app/.env .
+
+EXPOSE 8080
+
 CMD ["./forum"]

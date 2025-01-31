@@ -1,0 +1,29 @@
+.
+├── cmd
+│   └── main.go           <-- В этом файле ваш package main (точка входа)
+│   └── server.go
+│   └── routes.go
+├── internal
+│   ├── config
+│            ├── config.go
+│   ├── handlers
+│            coment.go
+│            ...
+│   ├── models
+│        ├── comment.go
+│            ...
+│   ├── ratelimiter
+│            ratelimiter.go
+│   └── sql
+│        └── sql.go
+├── migrations
+│        └── user_tables.sql
+            ...
+├── certs                 <-- Папка для сертификатов (создаётся в Makefile)
+│   ├── localhost.crt
+│   └── localhost.key
+├── go.mod
+├── go.sum
+│   .env    <-- GOOGLE_CLIENT_ID и т.д
+├── Makefile
+└── Dockerfile
